@@ -16,8 +16,8 @@ export default class RegisterScreen  extends Component {
     constructor(props){
         super(props);
         this.state={
-            email:'',
-            password: '',
+            email:'wandhizakari@gmail.com',
+            password: 'Password',
             error:false,
             message:'',
             loading:false

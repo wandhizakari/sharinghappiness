@@ -1,4 +1,5 @@
 platform :ios, '9.0'
+project './sharingHappiness.xcodeproj'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 target 'sharingHappiness' do
@@ -21,7 +22,7 @@ target 'sharingHappiness' do
   pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
   pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
   pod 'React-Core/RCTWebSocket', :path => '../node_modules/react-native/'
-  pod ‘FBSDKLoginKit’
+  pod 'FBSDKLoginKit'
   pod 'FBSDKShareKit'
   pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
   pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'

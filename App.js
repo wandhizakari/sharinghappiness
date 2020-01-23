@@ -22,6 +22,7 @@ import ProfileUser from './Screen/ProfileUserScreen';
 import AllScreen from './Screen/AllScreen';
 import AllProgramScreen from './Screen/AllProgramScreen';
 import KalkulatorZakatScreen from './Screen/kalkulatorZakat';
+import CreateCampaignScreen from './Screen/CreateCampaign';
 
 import FounderScreen from './Screen/FounderScreen';
 
@@ -89,6 +90,7 @@ const App = () => {
             <Scene key='founder' component={FounderScreen} navBar={CustomNavBar} title='Payment'/>
             <Scene key='allprogram' component={AllProgramScreen} navBar={CustomNavBar} title='Payment'/>
             <Scene key='kalkulator' component={KalkulatorZakatScreen} navBar={CustomNavBar} title='Payment'/>
+            <Scene key='createCampaign' component={CreateCampaignScreen} navBar={CustomNavBar} title='Create Campaign'/>
 
             {/* Main */}
 
