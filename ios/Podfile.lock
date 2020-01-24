@@ -210,6 +210,8 @@ PODS:
   - react-native-fbsdk/Share (1.1.1):
     - FBSDKShareKit (= 5.8)
     - React
+  - react-native-image-picker (2.2.0):
+    - React
   - react-native-webview (7.6.0):
     - React
   - React-RCTActionSheet (0.61.2):
@@ -277,6 +279,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-fbsdk (from `../node_modules/react-native-fbsdk`)
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -333,6 +336,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-fbsdk:
     :path: "../node_modules/react-native-fbsdk"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-RCTActionSheet:
@@ -386,6 +391,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 8909917ff7d8f21a57e443a866fd8d4560e50c65
   React-jsinspector: 111d7d342b07a904c400592e02a2b958f1098b60
   react-native-fbsdk: b94a83971c496a35803f38b921aec6d637ba07b5
+  react-native-image-picker: 5f9eabde109955b2faf6ef5d5114a49a8ff45ded
   react-native-webview: db4682f1698ab4b17a5e88f951031d203ff8aea8
   React-RCTActionSheet: 89b037c0fb7d2671607cb645760164e7e0c013f6
   React-RCTAnimation: e3cefa93c38c004c318f7ec04b883eb14b8b8235

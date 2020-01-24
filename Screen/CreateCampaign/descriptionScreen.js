@@ -4,183 +4,164 @@ import {
   Text, 
   View,
   TouchableOpacity,
-  Image,
   StyleSheet,
-  ScrollView,
-  TextInput
+  Dimensions,
+  Image
 } from 'react-native';
+import {RichEditor, RichToolbar} from 'react-native-pell-rich-editor';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import moment from 'moment';
-import { FormInput, FormDate, FormPicker } from '../../Components/Form';
+import ImagePicker from 'react-native-image-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { FormInput } from '../../Components/Form';
+
+const widthScreen = Dimensions.get('window').width
+const initHTML = `<br/>
+<center><b>Pell.js Rich Editor</b></center>
+<center>React Native</center>
+<br/>
+</br></br>
+`;
 
 type Props = {};
 export default class DescriptionScreen extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      category: '',
-      title: '',
-      targetFund: '',
-      deadline: '',
-      date: '',
-      location: '',
-      province: '',
-      city: '',
-      link: '',
+      target: '',
+      receiver: '',
+      imageData: [],
 
       isDTPVisible: false,
       role: '',
-
-      dataCategoryRaw: [],
-      dataCategory: [],
-      dataProvinceRaw: [],
-      dataProvince: [],
-      dataCityRaw: [],
-      dataCity: [],
     }
   }
 
   componentDidMount() {
-    this.getDataCategory()
+
   }
 
-  hideDatePicker = () => {
-    this.setState({ isDTPVisible: false })
-  }
-
-  handleConfirm = async date => {
-    let { role } = this.state
-
-    // you must setState role for every form for type date
-    this.state[role] = await moment(date).format('YYYY-MM-DD') 
-    this.setState({ isDTPVisible: false })
-  }
-
-  getDataCategory = () => {
-    fetch('https://sharinghappiness.org/api/v1/program-category', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+  pickImage() {
+    // More info on all the options is below in the API Reference... just some common use cases shown here
+    const options = {
+      title: 'Select Picture',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
       },
-    }).then((response) => response.json())
-    .then((respJson) => {
-      let data = respJson.result
-      let newData = []
-      for (let i=0; i < data.length; i++) {
-        newData[i] = { label: data[i].title, value: data[i].id, key: data[i].id }
+    };
+
+    ImagePicker.showImagePicker(options, async (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        let { imageData } = this.state
+        let newData = await imageData.slice(0)
+        newData[imageData.length] = await response
+        
+        this.setState({ imageData: newData })
       }
-      this.setState({ dataCategoryRaw: respJson.result, dataCategory: newData })
-      this.getDataProvince()
-    })
-    .catch((error) => {
-      console.error(error);
     });
   }
-  getDataProvince = () => {
-    fetch('https://sharinghappiness.org/api/v1/masterdata/province', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
-    .then((respJson) => {
-      let data = respJson.result.data
-      let newData = []
-      for (let i=0; i < data.length; i++) {
-        newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
-      }
-      console.log({province: newData})
-      this.setState({ dataProvinceRaw: respJson.result, dataProvince: newData })
-      this.getDataCity()
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  }
-  getDataCity = (id=null) => {
-    let uri = id ? `province/${id}` : ''
-    fetch(`https://sharinghappiness.org/api/v1/masterdata/city/${uri}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
-    .then((respJson) => {
-      console.log({respJson})
-      let data = respJson.result.data
-      let newData = []
-      for (let i=0; i < data.length; i++) {
-        newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
-      }
-      console.log({city: newData})
-      this.setState({ dataCityRaw: respJson.result, dataCity: newData })
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  }
+
+  save = async () => {
+    // Get the data here and call the interface to save the data
+    let html = await this.richText.getContentHtml();
+    console.log({html});
+  };
+
+  onPressAddImage = ()=> {
+    // insert URL
+    this.richText.insertImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1024px-React-icon.svg.png");
+    this.richText.blurContentEditor();
+  };
 
   render() {
-    let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, stepCount, index, stepLabel } = this.state
+    let { target, receiver, imageData } = this.state
+    console.log({imageData})
     return (
       <View style={{ flex: 1 }}>
-        <ScrollView style={ styles.container }>
+        <KeyboardAwareScrollView style={ styles.container } keyboardShouldPersistTaps='handled'>
           <View style={ styles.content }>
-            <FormPicker
-              data={ dataCategory }
-              label='Kategori Campaign'
-              value={category}
-              onValueChange={ (category) => this.setState({ category }) }
+            <FormInput
+              label='Receiver'
+              keyboardType='numeric'
+              value={receiver}
+              onChangeText={ (receiver) => this.setState({ receiver }) }
             />
             <FormInput
-              label='Judul Campaign'
-              value={title}
-              onChangeText={ (title) => this.setState({ title }) }
+              label='Target'
+              keyboardType='numeric'
+              value={target}
+              onChangeText={ (target) => this.setState({ target }) }
             />
-            <FormInput
-              label='Target Dana'
-              placeholder='Rp 0'
-              value={targetFund}
-              onChangeText={ (targetFund) => this.setState({ targetFund }) }
-            />
-            <FormDate
-              label='Deadline Penggalangan Dana'
-              value={ deadline ? moment(deadline).format('DD/MM/YYYY') : '' } // if date not filled, then show empty string
-              openDTP={ () => this.setState({ isDTPVisible: true, role: 'deadline' }) }
-            />
-            <FormDate
-              label='Pilih Tanggal'
-              value={ date ? moment(date).format('DD/MM/YYYY') : '' } // if date not filled, then show empty string
-              openDTP={ () => this.setState({ isDTPVisible: true, role: 'date' }) }
-            />
-            <FormInput
-              label='Lokasi Penyaluran'
-              value={location}
-              onChangeText={ (location) => this.setState({ location }) }
-            />
-            <FormPicker
-              data={ dataProvince }
-              label='Provinsi'
-              value={province}
-              onValueChange={ async (province) => {
-                await this.setState({ province })
-                this.getDataCity(province)
-              }}
-            />
-            <FormPicker
-              data={ dataCity }
-              label='Kota'
-              value={city}
-              onValueChange={ (city) => this.setState({ city }) }
-            />
-            <FormInput
-              label='Tentukan link untuk campaign'
-              value={link}
-              onChangeText={ (link) => this.setState({ link }) }
-            />
+
+            <View style={ styles.formWrapper }>
+              <View style={ styles.formTitle }>
+                <Text style={ styles.lbForm }>Gambar</Text>
+              </View>
+              <View style={ styles.formInputBox }>
+                {
+                  imageData.map((item, index) => {
+                    return (
+                      <View key={'key'+index} style={ styles.boxImage }>
+                        <Image
+                          source={{ uri: item.uri }}
+                          style={ styles.imgBox }
+                        />
+                          <TouchableOpacity 
+                            activeOpacity={.6}
+                            style={ styles.btnRemoveImg }
+                            onPress={ async () => {
+                              let dataHelper = await imageData.slice(0) //copy data
+                              await dataHelper.splice(index, 1)
+                              this.setState({ imageData: dataHelper })
+                            }}
+                          >
+                            <Text style={ styles.boxRemoveText }>x</Text>
+                          </TouchableOpacity>
+                      </View>
+                    )
+                  })
+                }
+                {
+                  imageData.length < 4 && // max 4 image for upload
+                    <TouchableOpacity 
+                      activeOpacity={.6}
+                      style={ styles.boxAddImage }
+                      onPress={ () => this.pickImage() }
+                    >
+                      <Text style={ styles.boxAddText }>+</Text>
+                    </TouchableOpacity>
+                }
+              </View>
+            </View>
+
+            <View style={ styles.formWrapper }>
+              <View style={ styles.formTitle }>
+                <Text style={ styles.lbForm }>Deskripsi</Text>
+              </View>
+              <View style={ styles.formInput }>
+                <View style={ styles.formInputRight }>
+                  <RichEditor
+                    ref={ rf => this.richText = rf }
+                    initialContentHTML={initHTML}
+                    style={styles.rich}
+                  />
+                </View>
+              </View>
+              <RichToolbar
+                style={styles.richBar}
+                getEditor={() => this.richText}
+                iconTint={'#000033'}
+                selectedIconTint={'#2095F2'}
+                selectedButtonStyle={{backgroundColor: "transparent"}}
+                onPressAddImage={this.onPressAddImage}
+              />
+            </View>
 
             <TouchableOpacity 
               activeOpacity={.6}
@@ -190,8 +171,7 @@ export default class DescriptionScreen extends Component<Props> {
               <Text style={ styles.submitText }>Lanjutkan</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-
+        </KeyboardAwareScrollView>
 
         <DateTimePickerModal
           isVisible={ this.state.isDTPVisible }
@@ -221,16 +201,81 @@ const styles = StyleSheet.create({
   content: {
     marginHorizontal: 15,
   },
-  stepperBox: {
-    ...shdw,
-    marginHorizontal: 15,
-    paddingVertical: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 20,
-    justifyContent: 'center'
+  rich: {
+    height: 150,
   },
+  richBar: {
+    height: 50,
+    backgroundColor: '#F5FCFF'
+  },
+  scroll : {
+    backgroundColor:'#ffffff'
+  },
+
+  formWrapper: {
+    marginVertical: 5,
+  },
+  imgCaret: {
+    width: 17.5,
+    height: 17.5,
+    resizeMode: 'contain',
+    marginRight: 2.5
+  },
+  formTitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cbLabel: {
+    fontSize: 14,
+    color: '#525355',
+    paddingLeft: 5,
+  },
+  lbForm: {
+    marginBottom: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4A4C4B'
+  },
+  formInput: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#DADADA',
+    padding: 5,
+    marginTop: 3,
+  },
+  formInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+    marginTop: 3,
+  },
+  txtFormControl: {
+    flex: 1,
+    padding: 0,
+    marginHorizontal: 5,
+    fontSize: 14,
+    color: '#525355',
+  },
+  formInputRight: {
+    flex: 1,
+    paddingRight: 5,
+    justifyContent: 'center',
+    // height: 30,
+  },
+  charLeftText: {
+    marginTop: 5,
+    fontSize: 12,
+    color: '#525355',
+  },
+  charLeftBoldText: {
+    fontSize: 12,
+    color: '#525355',
+    fontWeight: 'bold'
+  },
+
 
   btnSubmit: {
     alignSelf: 'flex-start',
@@ -263,7 +308,53 @@ const styles = StyleSheet.create({
     height: null,
     resizeMode: 'contain',
     margin: '15%'
-  }
+  },
+
+  boxImage: {
+    height: ((widthScreen-52.5)/4),
+    width: ((widthScreen-52.5)/4),
+    borderRadius: 5,
+    backgroundColor: '#DADADA',
+    marginHorizontal: 2.5,
+  },
+  boxAddImage: {
+    height: ((widthScreen-52.5)/4),
+    width: ((widthScreen-52.5)/4),
+    borderRadius: 5,
+    backgroundColor: '#DADADA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 2.5,
+  },
+  imgBox: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: 'cover',
+    borderRadius: 5,
+  },
+  boxAddText: {
+    fontSize: 30,
+    color: '#525355',
+    fontWeight: 'bold'
+  },
+  btnRemoveImg: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    height: 20,
+    width: 20,
+    borderRadius: 20*2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ff0000'
+  },
+  boxRemoveText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+
 });
 
 

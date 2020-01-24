@@ -10,6 +10,7 @@ import {
   TextInput
 } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import moment from 'moment';
 import { FormInput, FormDate, FormPicker } from '../../Components/Form';
 
@@ -127,7 +128,7 @@ export default class InformationScreen extends Component<Props> {
     let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, stepCount, index, stepLabel } = this.state
     return (
       <View style={{ flex: 1 }}>
-        <ScrollView style={ styles.container }>
+        <KeyboardAwareScrollView style={ styles.container } keyboardShouldPersistTaps='handled'>
           <View style={ styles.content }>
             <FormPicker
               data={ dataCategory }
@@ -191,7 +192,7 @@ export default class InformationScreen extends Component<Props> {
               <Text style={ styles.submitText }>Lanjutkan</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
 
         <DateTimePickerModal

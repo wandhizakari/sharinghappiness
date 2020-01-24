@@ -44,13 +44,13 @@ export default class CreateCampaignScreen extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      stepLabel: [ 'Informasi Campaign', 'Deskripsi Campaign', 'Reward' ],
-      stepCount: 3,
+      stepLabel: [ 'Informasi Campaign', 'Deskripsi Campaign' ],
+      stepCount: 2,
       index: 0,
       routes: [
         { key: 'first', title: 'First' },
         { key: 'second', title: 'Second' },
-        { key: 'third', title: 'Third' },
+        // { key: 'third', title: 'Third' },
       ],
     }
   }

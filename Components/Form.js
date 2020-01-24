@@ -13,8 +13,8 @@ import RNPickerSelect from 'react-native-picker-select';
 
 class FormInput extends Component {
   render() {
-    let { label, value, placeholder, maxLength } = this.props
-    let newPlaceholder = placeholder || 'Pilih '+label
+    let { label, value, placeholder, maxLength, keyboardType='default' } = this.props
+    let newPlaceholder = placeholder || 'Masukan '+label
     return (
       <View style={ styles.formWrapper }>
         <View style={ styles.formTitle }>
@@ -23,6 +23,7 @@ class FormInput extends Component {
         <View style={ styles.formInput }>
           <View style={ styles.formInputRight }>
             <TextInput 
+              keyboardType={keyboardType}
               value={ value }
               style={ styles.txtFormControl }
               placeholder={ newPlaceholder }
