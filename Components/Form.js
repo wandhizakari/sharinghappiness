@@ -6,14 +6,14 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  ScrollView,
+  Modal,
   TextInput
 } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
+import ModalPicker from './ModalPicker';
 
 class FormInput extends Component {
   render() {
-    let { label, value, placeholder, maxLength, keyboardType='default' } = this.props
+    let { label, value, placeholder, maxLength, multiline, secureTextEntry, keyboardType='default' } = this.props
     let newPlaceholder = placeholder || 'Masukan '+label
     return (
       <View style={ styles.formWrapper }>
@@ -21,8 +21,11 @@ class FormInput extends Component {
           <Text style={ styles.lbForm }>{ label }</Text>
         </View>
         <View style={ styles.formInput }>
-          <View style={ styles.formInputRight }>
+          <View style={ multiline ? styles.textareaRight : styles.formInputRight }>
             <TextInput 
+              multiline={multiline}
+              numberOfLines={ multiline ? 4 : 1 }
+              secureTextEntry={secureTextEntry}
               keyboardType={keyboardType}
               value={ value }
               style={ styles.txtFormControl }
@@ -45,34 +48,55 @@ class FormInput extends Component {
 }
 
 class FormPicker extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      modalPicker: false
+    }
+  }
+
   render() {
     let { label, value, placeholder, data } = this.props
-    const newPlaceholder = {
-      label: 'Pilih '+(placeholder || label),
-      value: null,
-    }
+    let findIdx = data.findIndex(e => e.value == value)
+    let newPlaceholder = placeholder || 'Pilih '+label
+    let valuePicker = value == '' ? newPlaceholder : data[findIdx].label
     return (
       <View style={ styles.formWrapper }>
         <View style={ styles.formTitle }>
           <Text style={ styles.lbForm }>{ label }</Text>
         </View>
-        <View style={ styles.formInput }>
+        <TouchableOpacity 
+          activeOpacity={.6}
+          style={ styles.formInput }
+          onPress={ () => this.setState({ modalPicker: true }) }
+        >
           <View style={[ styles.formInputRight,  ]}>
-            <RNPickerSelect
-              style={{ inputIOS: {...styles.cbLabel}, inputAndroid: {...styles.cbLabel} }}
-              hideDoneBar={false}
-              placeholder={newPlaceholder}
-              value={ value }
-              onValueChange={(value) => this.props.onValueChange(value) }
-              items={ data }
-            />
+            <Text style={ styles.formPicker }>{ valuePicker }</Text>
           </View>
           <Image 
             style={ styles.imgCaret } 
             source={ require('../Images/icon-caret-bottom.png') }
             resizeMode='contain' 
           />
-        </View>
+        </TouchableOpacity>
+
+        <Modal
+          animationType='slide'
+          transparent={false}
+          visible={this.state.modalPicker}
+          onRequestClose={() => this.setState({ modalPicker: false }) }
+        >
+          <ModalPicker
+            onRequestClose={() => this.setState({ modalPicker: false }) }
+            data={ data }
+            value={ value }
+            placeholder={ newPlaceholder }
+            onValueChange={ (val) => {
+              this.props.onValueChange(val)
+              this.setState({ modalPicker: false })
+            }}
+          />
+        </Modal>
       </View>
     )
   }
@@ -93,7 +117,7 @@ class FormDate extends Component {
           onPress={ () => this.props.openDTP() }
         >
           <View style={ styles.formInputRight }>
-            <Text style={[ styles.cbLabel, {color: value ? '#000' : '#C7C7CC' } ]}>{ value || newPlaceholder }</Text>
+            <Text style={[ styles.cbLabel, {color: value ? '#525355' : '#C7C7CC' } ]}>{ value || newPlaceholder }</Text>
           </View>
           <Image 
             style={ styles.imgCaret } 
@@ -163,6 +187,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 30,
   },
+  textareaRight: {
+    flex: 1,
+    paddingRight: 5,
+    justifyContent: 'center',
+    height: 80,
+  },
   charLeftText: {
     marginTop: 5,
     fontSize: 12,
@@ -172,6 +202,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#525355',
     fontWeight: 'bold'
+  },
+
+  formPicker: {
+    color: '#525355',
+    flexDirection: 'row',
+    borderRadius: 5,
+    padding: 5,
+    marginTop: 3,
   },
 });
 

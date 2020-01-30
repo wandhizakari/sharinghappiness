@@ -124,9 +124,13 @@ export default class ForgotScreen  extends Component {
                 <View style={{width:100,height:100,borderColor:'#eb6623',borderWidth:2,borderStyle:'solid',borderRadius:50,backgroundColor:'gold'}}></View>
                 <View style={{marginLeft:20}}>
                   <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white',fontSize:20}}>{this.state.username}</Text>
-                  <View style={{width:100,height:40,backgroundColor:'white',justifyContent:'center',alignItems:'center', borderRadius:5,marginTop:15}}>
-                  <Text style={{fontFamily:'arial',color:'#eb6623',fontSize:12}}>EDIT PROFILE </Text>
-                  </View>
+                  <TouchableOpacity 
+                    activeOpacity={.6}
+                    style={{height:40,backgroundColor:'white',justifyContent:'center',alignItems:'center', borderRadius:5,marginTop:15}}
+                    onPress={ () => Actions.profileSetting({ title: 'Profile Setting' }) }
+                  >
+                    <Text style={{fontFamily:'arial',color:'#eb6623',fontSize:12}}>EDIT PROFILE </Text>
+                  </TouchableOpacity>
                 </View>
                   
                   

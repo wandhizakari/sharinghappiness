@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Image
+  Image,
+  AsyncStorage
 } from 'react-native';
 import {RichEditor, RichToolbar} from 'react-native-pell-rich-editor';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -15,20 +16,18 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { FormInput } from '../../Components/Form';
 
 const widthScreen = Dimensions.get('window').width
-const initHTML = `<br/>
-<center><b>Pell.js Rich Editor</b></center>
-<center>React Native</center>
-<br/>
-</br></br>
-`;
 
 type Props = {};
 export default class DescriptionScreen extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      target: '',
-      receiver: '',
+      baseAmount: '12000000',
+      receiver: '10000000',
+      highlight: 'Butuh Cepat untuk Operasi kanker anak sebatang kara',
+      urlVideo: 'https://www.youtube.com/watch?v=9xwazD5SyVg',
+      content: '<h2>Content</h2>',
+      description: '<h2>Sharing Happiness</h2>',
       imageData: [],
 
       isDTPVisible: false,
@@ -67,25 +66,87 @@ export default class DescriptionScreen extends Component<Props> {
     });
   }
 
-  save = async () => {
-    // Get the data here and call the interface to save the data
-    let html = await this.richText.getContentHtml();
-    console.log({html});
-  };
+  async save() {
+    let { data:{ dataCategoryRaw, dataProvinceRaw, dataCityRaw, category, province, city } } = this.props
+    let { highlight, urlVideo, baseAmount, receiver } = this.state
 
-  onPressAddImage = ()=> {
-    // insert URL
-    this.richText.insertImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1024px-React-icon.svg.png");
-    this.richText.blurContentEditor();
-  };
+    console.log('wekekeke',{dataCategoryRaw, dataProvinceRaw, dataCityRaw})
+
+    let content = await this.richText.getContentHtml();
+    let description = await this.richText.getContentHtml();
+    await this.props.setData({ content, description, highlight, urlVideo, baseAmount, receiver })
+    await this.setState({ content: content, description: description })
+
+    let selectedCategory = await dataCategoryRaw.find(e => e.id == category) // get/find data category by category id selected
+    let selectedProvince = await dataProvinceRaw.find(e => e.id == province) // get/find data province by category id selected
+    let selectedCity = await dataCityRaw.find(e => e.id == city) // get/find data city by category id selected
+    const token = await AsyncStorage.getItem('token');
+
+    let { data } = this.props
+    let params = {
+      token: token,
+      token_email: 'wandhizakari@gmail.com',
+      user_id: 67733,
+      program_type_id: parseInt(selectedCategory.program_type_id),
+      program_category_id: parseInt(selectedCategory.id),
+      parent_id: 1,
+      title: data.title,
+      slug: data.link,
+      highlight: data.highlight,
+      description: data.description,
+      end_date: data.deadline,
+      city_id: parseInt(selectedCity.id),
+      province_id: parseInt(selectedProvince.id),
+      country_id: 1,
+      optional_location_name: data.location,
+      base_amount: parseInt(data.baseAmount),
+      target: parseInt(data.targetFund),
+      receiver: parseInt(data.receiver),
+      position_order: 1,
+      is_show_target: 1,
+      discount_price: 0,
+      optional_video_url: data.urlVideo,
+      imagearr: [],
+      is_rewarded: 0,
+      title_reward: 'title_reward',
+      condition: 2,
+      stock_count: 1,
+      content: data.content,
+      rewardimagearr: [],
+    }
+    console.log({params}, JSON.stringify(params))
+
+    fetch('https://sharinghappiness.org/api/v1/user/program/create', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    }).then((response) => response.json())
+    .then((respJson) => {
+      console.log({respJson})
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+    console.log({params})
+  }
 
   render() {
-    let { target, receiver, imageData } = this.state
-    console.log({imageData})
+    let { content, description, highlight, urlVideo, baseAmount, receiver, imageData } = this.state
+    let { data } = this.props // all data create campaign
+    console.log(data)
     return (
       <View style={{ flex: 1 }}>
         <KeyboardAwareScrollView style={ styles.container } keyboardShouldPersistTaps='handled'>
           <View style={ styles.content }>
+            <FormInput
+              label='Highlight'
+              value={highlight}
+              onChangeText={ (highlight) => this.setState({ highlight }) }
+            />
             <FormInput
               label='Receiver'
               keyboardType='numeric'
@@ -93,10 +154,15 @@ export default class DescriptionScreen extends Component<Props> {
               onChangeText={ (receiver) => this.setState({ receiver }) }
             />
             <FormInput
-              label='Target'
+              label='Base AMount'
               keyboardType='numeric'
-              value={target}
-              onChangeText={ (target) => this.setState({ target }) }
+              value={baseAmount}
+              onChangeText={ (baseAmount) => this.setState({ baseAmount }) }
+            />
+            <FormInput
+              label='Video URL'
+              value={urlVideo}
+              onChangeText={ (urlVideo) => this.setState({ urlVideo }) }
             />
 
             <View style={ styles.formWrapper }>
@@ -142,13 +208,36 @@ export default class DescriptionScreen extends Component<Props> {
 
             <View style={ styles.formWrapper }>
               <View style={ styles.formTitle }>
+                <Text style={ styles.lbForm }>Konten</Text>
+              </View>
+              <View style={ styles.formInput }>
+                <View style={ styles.formInputRight }>
+                  <RichEditor
+                    ref={ rf => this.richText = rf }
+                    initialContentHTML={content}
+                    style={styles.rich}
+                  />
+                </View>
+              </View>
+              <RichToolbar
+                style={styles.richBar}
+                getEditor={() => this.richText}
+                iconTint={'#000033'}
+                selectedIconTint={'#2095F2'}
+                selectedButtonStyle={{backgroundColor: "transparent"}}
+                onPressAddImage={this.onPressAddImage}
+              />
+            </View>
+
+            <View style={ styles.formWrapper }>
+              <View style={ styles.formTitle }>
                 <Text style={ styles.lbForm }>Deskripsi</Text>
               </View>
               <View style={ styles.formInput }>
                 <View style={ styles.formInputRight }>
                   <RichEditor
                     ref={ rf => this.richText = rf }
-                    initialContentHTML={initHTML}
+                    initialContentHTML={description}
                     style={styles.rich}
                   />
                 </View>
@@ -166,9 +255,9 @@ export default class DescriptionScreen extends Component<Props> {
             <TouchableOpacity 
               activeOpacity={.6}
               style={ styles.btnSubmit }
-              onPress={ () => this.props.changeTab(1) }
+              onPress={ () => this.save() }
             >
-              <Text style={ styles.submitText }>Lanjutkan</Text>
+              <Text style={ styles.submitText }>Simpan</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAwareScrollView>

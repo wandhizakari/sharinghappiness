@@ -67,17 +67,21 @@ export default class InformationScreen extends Component<Props> {
     }).then((response) => response.json())
     .then((respJson) => {
       let data = respJson.result
+      console.log({categoryRaw: data})
       let newData = []
       for (let i=0; i < data.length; i++) {
         newData[i] = { label: data[i].title, value: data[i].id, key: data[i].id }
       }
+      console.log({category: data})
       this.setState({ dataCategoryRaw: respJson.result, dataCategory: newData })
+      this.props.setData({dataCategoryRaw: respJson.result})
       this.getDataProvince()
     })
     .catch((error) => {
       console.error(error);
     });
   }
+  
   getDataProvince = () => {
     fetch('https://sharinghappiness.org/api/v1/masterdata/province', {
       method: 'GET',
@@ -88,12 +92,14 @@ export default class InformationScreen extends Component<Props> {
     }).then((response) => response.json())
     .then((respJson) => {
       let data = respJson.result.data
+      console.log({provinceRaw: data})
       let newData = []
       for (let i=0; i < data.length; i++) {
         newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
       }
       console.log({province: newData})
       this.setState({ dataProvinceRaw: respJson.result, dataProvince: newData })
+      this.props.setData({dataProvinceRaw: data})
       this.getDataCity()
     })
     .catch((error) => {
@@ -110,22 +116,42 @@ export default class InformationScreen extends Component<Props> {
       },
     }).then((response) => response.json())
     .then((respJson) => {
-      console.log({respJson})
       let data = respJson.result.data
+      console.log({cityRaw: data})
       let newData = []
       for (let i=0; i < data.length; i++) {
         newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
       }
       console.log({city: newData})
       this.setState({ dataCityRaw: respJson.result, dataCity: newData })
+      this.props.setData({dataCityRaw: data})
     })
     .catch((error) => {
       console.error(error);
     });
   }
 
+  selanjutnya() {
+    let { category, title, targetFund, deadline, date, location, province, city, link } = this.state
+    let data = {
+      category,
+      title,
+      targetFund,
+      deadline,
+      date,
+      location,
+      province,
+      city,
+      link
+    }
+    this.props.setData(data)
+    this.props.changeTab(1)
+  }
+
   render() {
     let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, stepCount, index, stepLabel } = this.state
+    let { data } = this.props // all data create campaign
+    console.log(data)
     return (
       <View style={{ flex: 1 }}>
         <KeyboardAwareScrollView style={ styles.container } keyboardShouldPersistTaps='handled'>
@@ -134,7 +160,7 @@ export default class InformationScreen extends Component<Props> {
               data={ dataCategory }
               label='Kategori Campaign'
               value={category}
-              onValueChange={ (category) => this.setState({ category }) }
+              onValueChange={ (val) => this.setState({ category: val.value }) }
             />
             <FormInput
               label='Judul Campaign'
@@ -167,16 +193,16 @@ export default class InformationScreen extends Component<Props> {
               data={ dataProvince }
               label='Provinsi'
               value={province}
-              onValueChange={ async (province) => {
-                await this.setState({ province })
-                this.getDataCity(province)
+              onValueChange={ async (val) => {
+                await this.setState({ province: val.value })
+                this.getDataCity(val.value)
               }}
             />
             <FormPicker
               data={ dataCity }
               label='Kota'
               value={city}
-              onValueChange={ (city) => this.setState({ city }) }
+              onValueChange={ (val) => this.setState({ city: val.value }) }
             />
             <FormInput
               label='Tentukan link untuk campaign'
@@ -187,7 +213,7 @@ export default class InformationScreen extends Component<Props> {
             <TouchableOpacity 
               activeOpacity={.6}
               style={ styles.btnSubmit }
-              onPress={ () => this.props.changeTab(1) }
+              onPress={ () => this.selanjutnya() }
             >
               <Text style={ styles.submitText }>Lanjutkan</Text>
             </TouchableOpacity>

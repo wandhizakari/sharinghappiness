@@ -52,6 +52,8 @@ export default class CreateCampaignScreen extends Component<Props> {
         { key: 'second', title: 'Second' },
         // { key: 'third', title: 'Third' },
       ],
+      
+      data: {}
     }
   }
 
@@ -63,9 +65,17 @@ export default class CreateCampaignScreen extends Component<Props> {
   renderScene = ({ route }) => {
     switch (route.key) {
       case 'first':
-        return <InformationScreen changeTab={ (index) => this.setState({ index }) } />;
+        return  <InformationScreen
+                  changeTab={ (index) => this.setState({ index }) } 
+                  setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
+                  data={ this.state.data }
+                />;
       case 'second':
-        return <DescriptionScreen changeTab={ (index) => this.setState({ index }) } />;
+        return  <DescriptionScreen
+                  changeTab={ (index) => this.setState({ index }) } 
+                  setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
+                  data={ this.state.data }
+                />;
       case 'third':
         return <View />;
         return <RewardScreen changeTab={ (index) => this.setState({ index }) } />;
@@ -75,7 +85,7 @@ export default class CreateCampaignScreen extends Component<Props> {
   };
 
   render() {
-    let { stepCount, index, routes, stepLabel } = this.state
+    let { stepCount, index, routes, stepLabel, data } = this.state
     const initialLayout = { width: Dimensions.get('window').width }
     return (
       <View style={ styles.container }>
