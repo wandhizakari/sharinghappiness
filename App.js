@@ -19,9 +19,13 @@ import AuthScreen from './Screen/AuthScreen';
 import Profile from './Screen/ProfileScreen'
 import DetailScreen from './Screen/DetailScreen';
 import ProfileUser from './Screen/ProfileUserScreen';
+import ProfileSetting from './Screen/ProfileSetting';
+import TambahAlamat from './Screen/ProfileSetting/TambahAlamat';
 import AllScreen from './Screen/AllScreen';
 import AllProgramScreen from './Screen/AllProgramScreen';
 import KalkulatorZakatScreen from './Screen/kalkulatorZakat';
+import CreateCampaignScreen from './Screen/CreateCampaign';
+import MyCampaignScreen from './Screen/MyCampaign';
 
 import FounderScreen from './Screen/FounderScreen';
 
@@ -85,10 +89,14 @@ const App = () => {
             <Scene key='donasi' component={DonasiScreen} navBar={CustomNavBar} title='Detail'/>
             <Scene key='all' component={AllScreen} navBar={CustomNavBar} title='Detail'/>
             <Scene key='profileUser' component={ProfileUser} navBar={CustomNavBar} title='Detail'/>
+            <Scene key='profileSetting' component={ProfileSetting} navBar={CustomNavBar} title='Pengaturan'/>
+            <Scene key='tambahAlamat' component={TambahAlamat} navBar={CustomNavBar} title='Tambah Alamat'/>
             <Scene key='donasiDone' component={DonasiDoneScreen} navBar={CustomNavBar} title='Payment'/>
             <Scene key='founder' component={FounderScreen} navBar={CustomNavBar} title='Payment'/>
             <Scene key='allprogram' component={AllProgramScreen} navBar={CustomNavBar} title='Payment'/>
             <Scene key='kalkulator' component={KalkulatorZakatScreen} navBar={CustomNavBar} title='Payment'/>
+            <Scene key='createCampaign' component={CreateCampaignScreen} navBar={CustomNavBar} title='Create Campaign'/>
+            <Scene key='myCampaign' component={MyCampaignScreen} navBar={CustomNavBar} title='Create Campaign'/>
 
             {/* Main */}
 

@@ -236,9 +236,13 @@ onScrollEnd( event ) {
                 </ScrollView>
                 </View>
                 <View style={{flex: 1,flexDirection:'row',padding:10}}>
-                  <View style={{flex: 2, backgroundColor: '#65b4ce',height:50,marginRight:5,borderRadius:5,justifyContent:'center',alignItems:'center'}}>
+                  <TouchableOpacity 
+                    activeOpacity={.6}
+                    style={{flex: 2, backgroundColor: '#65b4ce',height:50,marginRight:5,borderRadius:5,justifyContent:'center',alignItems:'center'}}
+                    onPress={()=>{ Actions.createCampaign({ title: 'Create Campaign' }) }}
+                  >
                     <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>CREATE CAMPAIGN</Text>
-                  </View>
+                  </TouchableOpacity>
                   <View style={{flex: 2, backgroundColor: '#eb6623',height:50,marginLeft:5,borderRadius:5,justifyContent:'center',alignItems:'center'}} >
                       <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>CREATE CAMPAIGN</Text>
                   </View>

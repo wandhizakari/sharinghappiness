@@ -16,6 +16,8 @@ export default class RegisterScreen  extends Component {
     constructor(props){
         super(props);
         this.state={
+            // email:'wandhizakari@gmail.com',
+            // password: 'Password',
             email:'',
             password: '',
             error:false,
@@ -34,7 +36,7 @@ export default class RegisterScreen  extends Component {
         AsyncStorage.getItem('logined').then((res) =>{
             console.log(res)
             if(res == 'true'){
-                Actions.home({title: 'Home'})
+              Actions.home({title: 'Home'})
             }else{
             }
         })
@@ -65,6 +67,7 @@ export default class RegisterScreen  extends Component {
         }),
         }).then((response) => response.json())
         .then((responseJson) => {
+          console.log({responseJson})
             this.setState({loading:false})
             if(responseJson.message){
                 this.setState({error:true,message:responseJson.message})
@@ -82,8 +85,8 @@ export default class RegisterScreen  extends Component {
                         if(responseJson.result){
                             AsyncStorage.setItem('username', responseJson.result.name);
                             AsyncStorage.setItem('token', responseJson.result.token); 
-                            // AsyncStorage.setItem('email', responseJson.result.email); 
-                            AsyncStorage.setItem('profile_picture', value.result.picture_thumbnail); 
+                            AsyncStorage.setItem('email', this.state.email); 
+                            AsyncStorage.setItem('dataSession', JSON.stringify(responseJson.result)); 
                         }
                     }else{
                         console.log('false')
