@@ -136,6 +136,13 @@ export default class ForgotScreen  extends Component {
                   
                 </View>
                 <View style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50}} ></View>
+                <TouchableOpacity 
+                  activeOpacity={.6}
+                  style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}}
+                  onPress={ () => Actions.myCampaign({ title: 'My Campaign' }) }
+                >
+                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>My Campaign</Text>
+                </TouchableOpacity>
                 <View style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}} >
                   <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>Account Setting </Text>
                 </View>

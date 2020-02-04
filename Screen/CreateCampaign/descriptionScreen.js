@@ -116,7 +116,7 @@ export default class DescriptionScreen extends Component<Props> {
     }
     console.log({params}, JSON.stringify(params))
 
-    fetch('https://sharinghappiness.org/api/v1/user/program/create', {
+    fetch('http://devel.sharinghappiness.org/api/v1/user/program/create', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
