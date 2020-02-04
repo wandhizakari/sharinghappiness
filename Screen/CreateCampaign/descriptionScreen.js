@@ -14,6 +14,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import ImagePicker from 'react-native-image-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { FormInput } from '../../Components/Form';
+import Snackbar from 'react-native-snackbar';
 
 const widthScreen = Dimensions.get('window').width
 
@@ -32,6 +33,7 @@ export default class DescriptionScreen extends Component<Props> {
 
       isDTPVisible: false,
       role: '',
+      loading: false,
     }
   }
 
@@ -69,6 +71,7 @@ export default class DescriptionScreen extends Component<Props> {
   async save() {
     let { data:{ dataCategoryRaw, dataProvinceRaw, dataCityRaw, category, province, city } } = this.props
     let { highlight, urlVideo, baseAmount, receiver } = this.state
+    this.setState({ loading: true })
 
     console.log('wekekeke',{dataCategoryRaw, dataProvinceRaw, dataCityRaw})
 
@@ -125,6 +128,21 @@ export default class DescriptionScreen extends Component<Props> {
       body: JSON.stringify(params),
     }).then((response) => response.json())
     .then((respJson) => {
+      this.setState({ loading: false })
+      if (respJson.status != 20) {
+        Snackbar.show({
+          text: respJson.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#bb0000',
+        });
+      } else {
+        Snackbar.show({
+          text: respJson.message || 'Data has been created',
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#4BB543'
+        })
+        Actions.pop()
+      }
       console.log({respJson})
     })
     .catch((error) => {
@@ -261,6 +279,13 @@ export default class DescriptionScreen extends Component<Props> {
             </TouchableOpacity>
           </View>
         </KeyboardAwareScrollView>
+
+        {
+          this.state.loading && 
+            <View style={ styles.loading }>
+            <Text style={ styles.loadingText }>Loading..</Text>
+          </View>
+        }
 
         <DateTimePickerModal
           isVisible={ this.state.isDTPVisible }
@@ -442,6 +467,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     fontWeight: 'bold'
+  },
+
+  loading: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .5)'
+  },
+  loadingText: {
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 10
   },
 
 });

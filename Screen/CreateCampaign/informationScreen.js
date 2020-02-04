@@ -32,6 +32,8 @@ export default class InformationScreen extends Component<Props> {
       isDTPVisible: false,
       role: '',
 
+      loading: false,
+
       dataCategoryRaw: [],
       dataCategory: [],
       dataProvinceRaw: [],
@@ -83,6 +85,7 @@ export default class InformationScreen extends Component<Props> {
   }
   
   getDataProvince = () => {
+    this.setState({ loading: true })
     fetch('https://sharinghappiness.org/api/v1/masterdata/province', {
       method: 'GET',
       headers: {
@@ -91,22 +94,37 @@ export default class InformationScreen extends Component<Props> {
       },
     }).then((response) => response.json())
     .then((respJson) => {
-      let data = respJson.result.data
-      console.log({provinceRaw: data})
-      let newData = []
-      for (let i=0; i < data.length; i++) {
-        newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
+      if (respJson.status == 20) {
+        let data = respJson.result.data
+        console.log({provinceRaw: data})
+        let newData = []
+        for (let i=0; i < data.length; i++) {
+          newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
+        }
+        console.log({province: newData})
+        this.setState({ dataProvinceRaw: respJson.result, dataProvince: newData, loading: false })
+        this.props.setData({dataProvinceRaw: data})
+        this.getDataCity()
+      } else {
+        this.setState({ loading: false })
+        Snackbar.show({
+          text: respJson.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#bb0000',
+          action: {
+            text: 'RETRY',
+            textColor: '#fff',
+            onPress: () => this.getDataProvince(),
+          },
+        });
       }
-      console.log({province: newData})
-      this.setState({ dataProvinceRaw: respJson.result, dataProvince: newData })
-      this.props.setData({dataProvinceRaw: data})
-      this.getDataCity()
     })
     .catch((error) => {
       console.error(error);
     });
   }
   getDataCity = (id=null) => {
+    this.setState({ loading: true })
     let uri = id ? `province/${id}` : ''
     fetch(`https://sharinghappiness.org/api/v1/masterdata/city/${uri}`, {
       method: 'GET',
@@ -116,15 +134,29 @@ export default class InformationScreen extends Component<Props> {
       },
     }).then((response) => response.json())
     .then((respJson) => {
-      let data = respJson.result.data
-      console.log({cityRaw: data})
-      let newData = []
-      for (let i=0; i < data.length; i++) {
-        newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
+      if (respJson.status == 20) {
+        let data = respJson.result.data
+        console.log({cityRaw: data})
+        let newData = []
+        for (let i=0; i < data.length; i++) {
+          newData[i] = { label: data[i].name, value: data[i].id, key: data[i].id }
+        }
+        console.log({city: newData})
+        this.props.setData({dataCityRaw: data})
+        this.setState({ dataCityRaw: respJson.result, dataCity: newData, loading: false })
+      } else {
+        this.setState({ loading: false })
+        Snackbar.show({
+          text: respJson.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#bb0000',
+          action: {
+            text: 'RETRY',
+            textColor: '#fff',
+            onPress: () => this.getDataCity(id),
+          },
+        });
       }
-      console.log({city: newData})
-      this.setState({ dataCityRaw: respJson.result, dataCity: newData })
-      this.props.setData({dataCityRaw: data})
     })
     .catch((error) => {
       console.error(error);
@@ -220,6 +252,12 @@ export default class InformationScreen extends Component<Props> {
           </View>
         </KeyboardAwareScrollView>
 
+        {
+          this.state.loading && 
+            <View style={ styles.loading }>
+            <Text style={ styles.loadingText }>Loading..</Text>
+          </View>
+        }
 
         <DateTimePickerModal
           isVisible={ this.state.isDTPVisible }
@@ -291,7 +329,20 @@ const styles = StyleSheet.create({
     height: null,
     resizeMode: 'contain',
     margin: '15%'
-  }
+  },
+
+  loading: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .5)'
+  },
+  loadingText: {
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 10
+  },
 });
 
 
