@@ -30,6 +30,7 @@ export default class DescriptionScreen extends Component<Props> {
       content: '<h2>Content</h2>',
       description: '<h2>Sharing Happiness</h2>',
       imageData: [],
+      dataSession: {},
 
       isDTPVisible: false,
       role: '',
@@ -37,8 +38,13 @@ export default class DescriptionScreen extends Component<Props> {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const email = await AsyncStorage.getItem('email');
+    const dataSession = await AsyncStorage.getItem('dataSession');
+    let session = JSON.parse(dataSession)
+    console.log({session})
 
+    await this.setState({ dataSession: {...session, email} })
   }
 
   pickImage() {
@@ -83,16 +89,15 @@ export default class DescriptionScreen extends Component<Props> {
     let selectedCategory = await dataCategoryRaw.find(e => e.id == category) // get/find data category by category id selected
     let selectedProvince = await dataProvinceRaw.find(e => e.id == province) // get/find data province by category id selected
     let selectedCity = await dataCityRaw.find(e => e.id == city) // get/find data city by category id selected
-    const token = await AsyncStorage.getItem('token');
 
     let { data } = this.props
     let params = {
-      token: token,
-      token_email: 'wandhizakari@gmail.com',
-      user_id: 67733,
-      program_type_id: parseInt(selectedCategory.program_type_id),
+      token: this.state.dataSession.id,
+      token_email: this.state.dataSession.email,
+      user_id: this.state.dataSession.id,
+      // program_type_id: parseInt(selectedCategory.program_type_id),
       program_category_id: parseInt(selectedCategory.id),
-      parent_id: 1,
+      // parent_id: 1,
       title: data.title,
       slug: data.link,
       highlight: data.highlight,
@@ -100,22 +105,22 @@ export default class DescriptionScreen extends Component<Props> {
       end_date: data.deadline,
       city_id: parseInt(selectedCity.id),
       province_id: parseInt(selectedProvince.id),
-      country_id: 1,
+      // country_id: 1,
       optional_location_name: data.location,
-      base_amount: parseInt(data.baseAmount),
+      // base_amount: parseInt(data.baseAmount),
       target: parseInt(data.targetFund),
-      receiver: parseInt(data.receiver),
-      position_order: 1,
+      // receiver: parseInt(data.receiver),
+      // position_order: 1,
       is_show_target: 1,
-      discount_price: 0,
+      // discount_price: 0,
       optional_video_url: data.urlVideo,
-      imagearr: [],
+      images: [],
       is_rewarded: 0,
-      title_reward: 'title_reward',
-      condition: 2,
-      stock_count: 1,
-      content: data.content,
-      rewardimagearr: [],
+      // title_reward: 'title_reward',
+      // condition: 2,
+      // stock_count: 1,
+      // content: data.content,
+      rewards: [],
     }
     console.log({params}, JSON.stringify(params))
 
@@ -165,18 +170,18 @@ export default class DescriptionScreen extends Component<Props> {
               value={highlight}
               onChangeText={ (highlight) => this.setState({ highlight }) }
             />
-            <FormInput
+            {/* <FormInput
               label='Receiver'
               keyboardType='numeric'
               value={receiver}
               onChangeText={ (receiver) => this.setState({ receiver }) }
-            />
-            <FormInput
+            /> */}
+            {/* <FormInput
               label='Base AMount'
               keyboardType='numeric'
               value={baseAmount}
               onChangeText={ (baseAmount) => this.setState({ baseAmount }) }
-            />
+            /> */}
             <FormInput
               label='Video URL'
               value={urlVideo}

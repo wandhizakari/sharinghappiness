@@ -33,10 +33,13 @@ export default class RegisterScreen  extends Component {
           console.log(res)
           
       })
-        AsyncStorage.getItem('logined').then((res) =>{
+        AsyncStorage.getItem('logined').then( async (res) =>{
             console.log(res)
             if(res == 'true'){
-              Actions.home({title: 'Home'})
+              let email = await AsyncStorage.getItem('email')
+              let password = await AsyncStorage.getItem('password')
+              console.log({email, password})
+              this.login(email, password)
             }else{
             }
         })
@@ -53,7 +56,7 @@ export default class RegisterScreen  extends Component {
         
     }
 
-    login= async ()=>{
+    login = async (email=this.state.email, password=this.state.password) => {
         this.setState({loading:true})
         fetch('http://devel.sharinghappiness.org/api/v1/user/login', {
         method: 'POST',
@@ -62,11 +65,11 @@ export default class RegisterScreen  extends Component {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            email: this.state.email,
-            password: this.state.password,
+            email: email,
+            password: password,
         }),
         }).then((response) => response.json())
-        .then((responseJson) => {
+        .then( async (responseJson) => {
           console.log({responseJson})
             this.setState({loading:false})
             if(responseJson.message){
@@ -74,8 +77,8 @@ export default class RegisterScreen  extends Component {
             }
             if(responseJson.status == 20){
                 try {
-                    AsyncStorage.setItem('logined', 'true');
-                    const value = AsyncStorage.getItem('logined')
+                    await AsyncStorage.setItem('logined', 'true');
+                    const value = await AsyncStorage.getItem('logined')
                     console.log(value)
                     
                     if(value){
@@ -83,10 +86,12 @@ export default class RegisterScreen  extends Component {
                         Actions.home({title: 'Home'})
 
                         if(responseJson.result){
-                            AsyncStorage.setItem('username', responseJson.result.name);
-                            AsyncStorage.setItem('token', responseJson.result.token); 
-                            AsyncStorage.setItem('email', this.state.email); 
-                            AsyncStorage.setItem('dataSession', JSON.stringify(responseJson.result)); 
+                          console.log('simpan semuaaa', responseJson.result)
+                            await AsyncStorage.setItem('token', responseJson.result.token); 
+                            await AsyncStorage.setItem('username', responseJson.result.name);
+                            await AsyncStorage.setItem('email', email); 
+                            await AsyncStorage.setItem('password', password); 
+                            await AsyncStorage.setItem('dataSession', JSON.stringify(responseJson.result)); 
                         }
                     }else{
                         console.log('false')

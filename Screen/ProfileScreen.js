@@ -112,8 +112,18 @@ export default class ForgotScreen  extends Component {
     }
 
     logout = async () =>{
-      AsyncStorage.setItem('logined', 'false');
-      Actions.refresh({key: 'Login', hideNavBar: true});
+      try {
+        await AsyncStorage.setItem('logined', 'false');
+        await AsyncStorage.removeItem('token'); 
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email'); 
+        await AsyncStorage.removeItem('password'); 
+        await AsyncStorage.removeItem('dataSession'); 
+        Actions.reset('Login');
+      }
+      catch(exception) {
+          return false;
+      }
     }
 
     render() {

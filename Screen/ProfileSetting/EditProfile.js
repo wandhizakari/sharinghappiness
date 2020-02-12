@@ -101,15 +101,20 @@ export default class EditProfileScreen extends Component<Props> {
 
   updateDataProfile = async () => {
     this.setState({ loading: true })
-    let { token, email, name, phone, password, newPassword, newPasswordConfirm } = this.state
-    let params = {
-      token,
-      token_email: email,
-      name,
-      phone_number: phone,
-      bio: '',
-      picture: '',
-    }
+    let { token, email, name, phone, password, newPassword, newPasswordConfirm, picture } = this.state
+
+    const params = new FormData();
+    params.append('token', token)
+    params.append('token_email', email)
+    params.append('name', name)
+    params.append('phone_number', phone)
+    params.append('bio', '')
+    params.append('picture', {
+      uri: picture.uri,
+      type: picture.type,
+      name: picture.fileName
+    });
+    
     fetch(`http://devel.sharinghappiness.org/api/v1/user/profile`, {
       method: 'POST',
       headers: {

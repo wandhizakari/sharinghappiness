@@ -211,11 +211,11 @@ export default class InformationScreen extends Component<Props> {
               value={ deadline ? moment(deadline).format('DD/MM/YYYY') : '' } // if date not filled, then show empty string
               openDTP={ () => this.setState({ isDTPVisible: true, role: 'deadline' }) }
             />
-            <FormDate
+            {/* <FormDate
               label='Pilih Tanggal'
               value={ date ? moment(date).format('DD/MM/YYYY') : '' } // if date not filled, then show empty string
               openDTP={ () => this.setState({ isDTPVisible: true, role: 'date' }) }
-            />
+            /> */}
             <FormInput
               label='Lokasi Penyaluran'
               value={location}
@@ -226,7 +226,7 @@ export default class InformationScreen extends Component<Props> {
               label='Provinsi'
               value={province}
               onValueChange={ async (val) => {
-                await this.setState({ province: val.value })
+                await this.setState({ province: val.value, city: '' })
                 this.getDataCity(val.value)
               }}
             />
