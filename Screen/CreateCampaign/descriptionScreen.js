@@ -15,6 +15,7 @@ import ImagePicker from 'react-native-image-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { FormInput } from '../../Components/Form';
 import Snackbar from 'react-native-snackbar';
+import { Actions } from 'react-native-router-flux';
 
 const widthScreen = Dimensions.get('window').width
 
@@ -86,13 +87,15 @@ export default class DescriptionScreen extends Component<Props> {
     await this.props.setData({ content, description, highlight, urlVideo, baseAmount, receiver })
     await this.setState({ content: content, description: description })
 
+    const token = await AsyncStorage.getItem('token');
+
     let selectedCategory = await dataCategoryRaw.find(e => e.id == category) // get/find data category by category id selected
     let selectedProvince = await dataProvinceRaw.find(e => e.id == province) // get/find data province by category id selected
     let selectedCity = await dataCityRaw.find(e => e.id == city) // get/find data city by category id selected
 
     let { data } = this.props
     let params = {
-      token: this.state.dataSession.id,
+      token: token,
       token_email: this.state.dataSession.email,
       user_id: this.state.dataSession.id,
       // program_type_id: parseInt(selectedCategory.program_type_id),
