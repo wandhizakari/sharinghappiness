@@ -24,12 +24,18 @@ export default class DescriptionScreen extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      baseAmount: '12000000',
-      receiver: '10000000',
-      highlight: 'Butuh Cepat untuk Operasi kanker anak sebatang kara',
-      urlVideo: 'https://www.youtube.com/watch?v=9xwazD5SyVg',
-      content: '<h2>Content</h2>',
-      description: '<h2>Sharing Happiness</h2>',
+      // baseAmount: '12000000',
+      // receiver: '10000000',
+      // highlight: 'Butuh Cepat untuk Operasi kanker anak sebatang kara',
+      // urlVideo: 'https://www.youtube.com/watch?v=9xwazD5SyVg',
+      // content: '<h2>Content</h2>',
+      // description: '<h2>Sharing Happiness</h2>',
+      baseAmount: '',
+      receiver: '',
+      highlight: '',
+      urlVideo: '',
+      content: '',
+      description: '',
       imageData: [],
       dataSession: {},
 
@@ -37,6 +43,7 @@ export default class DescriptionScreen extends Component<Props> {
       role: '',
       loading: false,
     }
+    global._DESCRIPTION_CREATE = this
   }
 
   async componentDidMount() {
@@ -89,9 +96,9 @@ export default class DescriptionScreen extends Component<Props> {
 
     const token = await AsyncStorage.getItem('token');
 
-    let selectedCategory = await dataCategoryRaw.find(e => e.id == category) // get/find data category by category id selected
-    let selectedProvince = await dataProvinceRaw.find(e => e.id == province) // get/find data province by category id selected
-    let selectedCity = await dataCityRaw.find(e => e.id == city) // get/find data city by category id selected
+    let selectedCategory = await dataCategoryRaw.find(e => e.id == category) || '' // get/find data category by category id selected
+    let selectedProvince = await dataProvinceRaw.find(e => e.id == province) || '' // get/find data province by category id selected
+    let selectedCity = await dataCityRaw.find(e => e.id == city) || '' // get/find data city by category id selected
 
     let { data } = this.props
     let params = {
@@ -150,6 +157,88 @@ export default class DescriptionScreen extends Component<Props> {
           backgroundColor: '#4BB543'
         })
         Actions.pop()
+      }
+      console.log({respJson})
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+    console.log({params})
+  }
+
+  async update() {
+    let { data:{ dataCategoryRaw, dataProvinceRaw, dataCityRaw, category, province, city } } = this.props
+    let { highlight, urlVideo, baseAmount, receiver } = this.state
+    this.setState({ loading: true })
+
+    console.log('wekekeke',{dataCategoryRaw, dataProvinceRaw, dataCityRaw})
+
+    let content = await this.richText.getContentHtml();
+    let description = await this.richText.getContentHtml();
+    await this.props.setData({ content, description, highlight, urlVideo, baseAmount, receiver })
+    await this.setState({ content: content, description: description })
+
+    const token = await AsyncStorage.getItem('token');
+
+    let selectedCategory = await dataCategoryRaw.find(e => e.id == category) || '' // get/find data category by category id selected
+    let selectedProvince = await dataProvinceRaw.find(e => e.id == province) || '' // get/find data province by category id selected
+    let selectedCity = await dataCityRaw.find(e => e.id == city) || '' // get/find data city by category id selected
+
+    let { data } = this.props
+
+    let params = {
+      token: token,
+      token_email: this.state.dataSession.email,
+      user_id: this.state.dataSession.id,
+      program_category_id: this.props.isEdit 
+                            ? data.categoryData.id || parseInt(selectedCategory.id)
+                            : parseInt(selectedCategory.id),
+      title: data.title,
+      slug: data.link,
+      highlight: data.highlight,
+      description: data.description,
+      end_date: data.deadline,
+      city_id: this.props.isEdit 
+                ? data.cityData.id || parseInt(selectedCity.id)
+                : parseInt(selectedCity.id),
+      province_id: this.props.isEdit 
+                ? data.provinceData.id || parseInt(selectedProvince.id)
+                : parseInt(selectedProvince.id),
+      optional_location_name: data.location,
+      target: parseInt(data.targetFund),
+      is_show_target: 1,
+      optional_video_url: data.urlVideo,
+      images: [],
+      is_rewarded: 0,
+      rewards: [],
+    }
+    console.log({params}, JSON.stringify(params))
+    fetch(`http://devel.sharinghappiness.org/api/v1/user/program/${data.idProgram}/update`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    }).then((response) => response.json())
+    .then((respJson) => {
+      console.log('HASIL UBAH', respJson)
+      this.setState({ loading: false })
+      if (respJson.status != 20) {
+        Snackbar.show({
+          text: respJson.message,
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#bb0000',
+        });
+      } else {
+        Snackbar.show({
+          text: respJson.message || 'Data has been created',
+          duration: Snackbar.LENGTH_LONG,
+          backgroundColor: '#4BB543'
+        })
+        Actions.pop()
+        global._MYCAMPAIGN.getProgram()
       }
       console.log({respJson})
     })
@@ -232,7 +321,7 @@ export default class DescriptionScreen extends Component<Props> {
               </View>
             </View>
 
-            <View style={ styles.formWrapper }>
+            {/* <View style={ styles.formWrapper }>
               <View style={ styles.formTitle }>
                 <Text style={ styles.lbForm }>Konten</Text>
               </View>
@@ -253,7 +342,7 @@ export default class DescriptionScreen extends Component<Props> {
                 selectedButtonStyle={{backgroundColor: "transparent"}}
                 onPressAddImage={this.onPressAddImage}
               />
-            </View>
+            </View> */}
 
             <View style={ styles.formWrapper }>
               <View style={ styles.formTitle }>
@@ -278,13 +367,23 @@ export default class DescriptionScreen extends Component<Props> {
               />
             </View>
 
-            <TouchableOpacity 
-              activeOpacity={.6}
-              style={ styles.btnSubmit }
-              onPress={ () => this.save() }
-            >
-              <Text style={ styles.submitText }>Simpan</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity 
+                activeOpacity={.6}
+                style={ styles.btnBack }
+                onPress={ () => this.props.changeTab(0) }
+              >
+                <Text style={ styles.backText }>Kembali</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                activeOpacity={.6}
+                style={ styles.btnSubmit }
+                onPress={ () => this.props.isEdit ? this.update() : this.save() }
+              >
+                <Text style={ styles.submitText }>Simpan</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </KeyboardAwareScrollView>
 
@@ -399,6 +498,22 @@ const styles = StyleSheet.create({
   },
 
 
+  btnBack: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 27.5,
+    paddingVertical: 12.5,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#FF7E50',
+    borderRadius: 5,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FF7E50'
+  },
   btnSubmit: {
     alignSelf: 'flex-start',
     paddingHorizontal: 27.5,

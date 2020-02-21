@@ -66,12 +66,18 @@ export default class CreateCampaignScreen extends Component<Props> {
     switch (route.key) {
       case 'first':
         return  <InformationScreen
+                  isEdit={ this.props.isEdit || false }
+                  dataProgram={this.props.item}
+                  // slug={ this.props.slug }
+                  slug={this.props.item.slug}
                   changeTab={ (index) => this.setState({ index }) } 
                   setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
                   data={ this.state.data }
                 />;
       case 'second':
         return  <DescriptionScreen
+                  isEdit={ this.props.isEdit || false }
+                  dataProgram={this.props.item}
                   changeTab={ (index) => this.setState({ index }) } 
                   setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
                   data={ this.state.data }
@@ -101,6 +107,7 @@ export default class CreateCampaignScreen extends Component<Props> {
 
         <TabView
           navigationState={{ index, routes }}
+          lazy={true}
           renderTabBar={ () => null }
           renderScene={ this.renderScene }
           onIndexChange={ (index) => this.setState({ index }) }

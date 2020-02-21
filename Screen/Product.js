@@ -95,7 +95,7 @@ export default class ForgotScreen  extends Component {
         },
         }).then((response) => response.json())
         .then((responseJson) => {
-            console.log(responseJson)
+            console.log({responseJson})
           let img =[]
           for(var a =0;a<responseJson.result.length;a++){
             img.push({image:responseJson.result[a].cover_picture.image,title:responseJson.result[a].title,location:responseJson.result[a].optional_location_name,date:responseJson.result[a].end_date,terkumpul:responseJson.result[a].collected,total:responseJson.result[a].target,slug:responseJson.result[a].slug})
@@ -122,7 +122,7 @@ export default class ForgotScreen  extends Component {
       },
       }).then((response) => response.json())
       .then((responseJson) => {
-          console.log(responseJson)
+          console.log({responseJson})
         let img1 =[]
         for(var a =0;a<responseJson.result.length;a++){
           img1.push({image:responseJson.result[a].cover_picture.image,title:responseJson.result[a].title,location:responseJson.result[a].optional_location_name,date:responseJson.result[a].end_date,terkumpul:responseJson.result[a].collected,total:responseJson.result[a].target,slug:responseJson.result[a].slug})

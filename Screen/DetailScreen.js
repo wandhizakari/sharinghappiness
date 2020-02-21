@@ -17,6 +17,7 @@ import { WebView } from 'react-native-webview';
 
 import { Actions } from 'react-native-router-flux'; // New code
 import { SliderBox } from "react-native-image-slider-box";
+import Snackbar from 'react-native-snackbar';
 const widthScreen = Dimensions.get('window').width
 const heightScreen = Dimensions.get('window').height
 
@@ -62,10 +63,8 @@ export default class ForgotScreen  extends Component {
       return rupiah
     }
     
-  
-
     getDetail= async ()=>{
-        console.log(this.state)
+        console.log('http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug)
         fetch('http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug, {
         method: 'GET',
         headers: {
@@ -75,19 +74,23 @@ export default class ForgotScreen  extends Component {
         }).then((response) => response.json())
         .then((responseJson) => {
           console.log(responseJson)
-
-          let img = []
-          if(responseJson.result.galleries){
-          responseJson.result.galleries.map( item => {
-              img.push(item.image)
-
-          })
-        }
-        //   console.warn(img)
-          this.setState({images:img,content:responseJson.result,width:((widthScreen*responseJson.result.collected)/responseJson.result.target)})
-          
-         
-          
+          if (responseJson.status == 30) {
+            Snackbar.show({
+              text: responseJson.message,
+              duration: Snackbar.LENGTH_LONG,
+              backgroundColor: '#bb0000',
+            })
+            Actions.pop()
+          } else {
+            let img = []
+            if(responseJson.result.galleries){
+              responseJson.result.galleries.map( item => {
+                  img.push(item.image)
+    
+              })
+            }
+            this.setState({images:img,content:responseJson.result,width:((widthScreen*responseJson.result.collected)/responseJson.result.target)})
+          }
         })
         .catch((error) => {
           console.error(error);

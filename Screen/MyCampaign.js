@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { AsyncStorage, Dimensions, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AsyncStorage, Dimensions, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import Snackbar from 'react-native-snackbar';
+import { Actions } from 'react-native-router-flux';
 const widthScreen = Dimensions.get('window').width;
 export default class ForgotScreen extends Component {
   constructor(props) {
@@ -12,6 +13,7 @@ export default class ForgotScreen extends Component {
 
       loading: false
     };
+    global._MYCAMPAIGN = this
   }
 
   async componentDidMount() {
@@ -25,7 +27,6 @@ export default class ForgotScreen extends Component {
     this.setState({ loading: true })
     let { token, email } = this.state
 
-    console.log(`http://devel.sharinghappiness.org/api/v1/user/program?token=${token}&token_email=${email}`);
     fetch(`http://devel.sharinghappiness.org/api/v1/user/program?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
@@ -35,7 +36,7 @@ export default class ForgotScreen extends Component {
     })
       .then(response => response.json())
       .then(responseJson => {
-        console.log(responseJson);
+        console.log({responseJson});
         let data = [];
         this.setState({loading: false});
         if (responseJson.result) {
@@ -47,7 +48,10 @@ export default class ForgotScreen extends Component {
               date: responseJson.result[a].end_date,
               terkumpul: responseJson.result[a].collected,
               total: responseJson.result[a].target,
+              slug: responseJson.result[a].slug,
+              id: responseJson.result[a].id,
               user: responseJson.result[a].user.name,
+              dataRaw: responseJson.result[a]
             });
           }
         }
@@ -61,6 +65,39 @@ export default class ForgotScreen extends Component {
           this.setState({ data });
         }
         this.setState({ loading: false })
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+  deleteProgram = (id) => {
+    this.setState({ loading: true })
+    let { token, email } = this.state
+
+    fetch(`http://devel.sharinghappiness.org/api/v1/user/program/delete/${id}?token=${token}&token_email=${email}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => response.json())
+      .then(responseJson => {
+        this.setState({ loading: false })
+        if (responseJson.status != 20) {
+          Snackbar.show({
+            text: responseJson.message,
+            duration: Snackbar.LENGTH_LONG,
+            backgroundColor: '#bb0000',
+          })
+        } else {
+          this.getProgram()
+          Snackbar.show({
+            text: responseJson.message,
+            duration: Snackbar.LENGTH_LONG,
+            backgroundColor: '#4BB543'
+          })
+        }
       })
       .catch(error => {
         console.error(error);
@@ -83,6 +120,22 @@ export default class ForgotScreen extends Component {
         activeOpacity={.6}
         style={{width:widthScreen/2, //here you can use flex:1 also
           flexDirection:'row',marginRight:10,marginBottom:10}}
+        onPress={ () => Actions.Detail({ title: 'details', slug: item.slug }) }
+        onLongPress={() => {
+          Alert.alert(
+            item.title,
+            '',
+            [
+              {
+                text: 'Edit',
+                onPress: () => Actions.createCampaign({ title: 'Edit Campaign', isEdit: true, item: item.dataRaw }),
+              },
+              {text: 'Delete', onPress: () => this.deleteProgram(item.id) },
+              {text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
+            ],
+            {cancelable: false},
+          );
+        }}
       >
         <Image style={{width:150,height:100, resizeMode: 'cover'}} resizeMethod='resize' source={{ uri: item.image }} />
         

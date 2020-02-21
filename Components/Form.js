@@ -13,7 +13,7 @@ import ModalPicker from './ModalPicker';
 
 class FormInput extends Component {
   render() {
-    let { label, value, placeholder, maxLength, multiline, secureTextEntry, keyboardType='default' } = this.props
+    let { label, value, placeholder, maxLength, multiline, secureTextEntry, keyboardType='default', autoCapitalize } = this.props
     let newPlaceholder = placeholder || 'Masukan '+label
     return (
       <View style={ styles.formWrapper }>
@@ -30,6 +30,7 @@ class FormInput extends Component {
               value={ value }
               style={ styles.txtFormControl }
               placeholder={ newPlaceholder }
+              autoCapitalize={ autoCapitalize }
               onChangeText={ (val) => {
                 if (maxLength) {
                   this.props.onChangeText(val.length > maxLength ? val.slice(0, maxLength) : val)
@@ -56,10 +57,11 @@ class FormPicker extends Component {
   }
 
   render() {
-    let { label, value, placeholder, data } = this.props
+    let { label, value, valueTemp, placeholder, data } = this.props
     let findIdx = data.findIndex(e => e.value == value)
+    console.log({findIdx})
     let newPlaceholder = placeholder || 'Pilih '+label
-    let valuePicker = value == '' ? newPlaceholder : data[findIdx].label
+    let valuePicker = value == '' ? newPlaceholder : findIdx != -1 ? data[findIdx].label : ''
     return (
       <View style={ styles.formWrapper }>
         <View style={ styles.formTitle }>
@@ -71,7 +73,7 @@ class FormPicker extends Component {
           onPress={ () => this.setState({ modalPicker: true }) }
         >
           <View style={[ styles.formInputRight,  ]}>
-            <Text style={ styles.formPicker }>{ valuePicker }</Text>
+            <Text style={ styles.formPicker }>{ valuePicker || (valueTemp ? valueTemp : '') }</Text>
           </View>
           <Image 
             style={ styles.imgCaret } 

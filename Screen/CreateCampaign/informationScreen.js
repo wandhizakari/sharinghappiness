@@ -13,12 +13,18 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import moment from 'moment';
 import { FormInput, FormDate, FormPicker } from '../../Components/Form';
+import Snackbar from 'react-native-snackbar';
+import { Actions } from 'react-native-router-flux';
 
 type Props = {};
 export default class InformationScreen extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
+      categoryData: {},
+      cityData: {},
+      provinceData: {},
+
       category: '',
       title: '',
       targetFund: '',
@@ -28,6 +34,11 @@ export default class InformationScreen extends Component<Props> {
       province: '',
       city: '',
       link: '',
+
+      content: '',
+      description: '',
+      highlight: '',
+      urlVideo: '',
 
       isDTPVisible: false,
       role: '',
@@ -44,7 +55,7 @@ export default class InformationScreen extends Component<Props> {
   }
 
   componentDidMount() {
-    this.getDataCategory()
+    this.getDataCategory(true)
   }
 
   hideDatePicker = () => {
@@ -59,7 +70,7 @@ export default class InformationScreen extends Component<Props> {
     this.setState({ isDTPVisible: false })
   }
 
-  getDataCategory = () => {
+  getDataCategory = (init=false) => {
     fetch('https://sharinghappiness.org/api/v1/program-category', {
       method: 'GET',
       headers: {
@@ -77,14 +88,14 @@ export default class InformationScreen extends Component<Props> {
       console.log({category: data})
       this.setState({ dataCategoryRaw: respJson.result, dataCategory: newData })
       this.props.setData({dataCategoryRaw: respJson.result})
-      this.getDataProvince()
+      this.getDataProvince(init)
     })
     .catch((error) => {
       console.error(error);
     });
   }
   
-  getDataProvince = () => {
+  getDataProvince = (init=false) => {
     this.setState({ loading: true })
     fetch('https://sharinghappiness.org/api/v1/masterdata/province', {
       method: 'GET',
@@ -104,7 +115,7 @@ export default class InformationScreen extends Component<Props> {
         console.log({province: newData})
         this.setState({ dataProvinceRaw: respJson.result, dataProvince: newData, loading: false })
         this.props.setData({dataProvinceRaw: data})
-        this.getDataCity()
+        this.getDataCity(null, init)
       } else {
         this.setState({ loading: false })
         Snackbar.show({
@@ -123,7 +134,7 @@ export default class InformationScreen extends Component<Props> {
       console.error(error);
     });
   }
-  getDataCity = (id=null) => {
+  getDataCity = (id=null, init=false) => {
     this.setState({ loading: true })
     let uri = id ? `province/${id}` : ''
     fetch(`https://sharinghappiness.org/api/v1/masterdata/city/${uri}`, {
@@ -143,7 +154,10 @@ export default class InformationScreen extends Component<Props> {
         }
         console.log({city: newData})
         this.props.setData({dataCityRaw: data})
-        this.setState({ dataCityRaw: respJson.result, dataCity: newData, loading: false })
+        this.setState({ dataCityRaw: respJson.result, dataCity: newData })
+        this.props.isEdit 
+          ? init ? this.getDetail() : this.setState({ loading: false })
+          : this.setState({ loading: false })
       } else {
         this.setState({ loading: false })
         Snackbar.show({
@@ -162,9 +176,33 @@ export default class InformationScreen extends Component<Props> {
       console.error(error);
     });
   }
+  getDetail = () => {
+    let item = this.props.dataProgram
+    console.log({ itemmmmm: item })
+    this.setState({
+      idProgram: item.id,
+      categoryData: item.category,
+      cityData: item.city,
+      category: item.category.id,
+      title: item.title,
+      targetFund: item.target,
+      deadline: item.end_date,
+      location: item.optional_location_name,
+      province: item.city.province_id,
+      city: item.city.id,
+      link: item.slug,
 
-  selanjutnya() {
-    let { category, title, targetFund, deadline, date, location, province, city, link } = this.state
+      content: '', 
+      description: item.description, 
+      highlight: item.highlight,
+      urlVideo: '', 
+
+      loading: false,
+    })
+  }
+
+  async selanjutnya() {
+    let { category, title, targetFund, deadline, date, location, province, city, link, categoryData, cityData, provinceData, idProgram } = this.state
     let data = {
       category,
       title,
@@ -174,14 +212,26 @@ export default class InformationScreen extends Component<Props> {
       location,
       province,
       city,
-      link
+      link,
+      categoryData,
+      cityData, 
+      provinceData,
+      idProgram,
     }
-    this.props.setData(data)
-    this.props.changeTab(1)
+    await this.props.changeTab(1)
+    await this.props.setData(data)
+    await global._DESCRIPTION_CREATE.setState({ 
+      // content: '', 
+      description: this.state.description, 
+      highlight: this.state.highlight,
+      urlVideo: this.state.urlVideo, 
+      // baseAmount, 
+      // receiver
+    })
   }
 
   render() {
-    let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, stepCount, index, stepLabel } = this.state
+    let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, cityData, categoryData } = this.state
     let { data } = this.props // all data create campaign
     console.log(data)
     return (
@@ -192,7 +242,8 @@ export default class InformationScreen extends Component<Props> {
               data={ dataCategory }
               label='Kategori Campaign'
               value={category}
-              onValueChange={ (val) => this.setState({ category: val.value }) }
+              valueTemp={ this.props.isEdit ? categoryData.title : false } // valueTemp untuk value sementara jika id value tidak ada pada list
+              onValueChange={ (val) => this.setState({ category: val.value, categoryData: {} }) }
             />
             <FormInput
               label='Judul Campaign'
@@ -226,7 +277,7 @@ export default class InformationScreen extends Component<Props> {
               label='Provinsi'
               value={province}
               onValueChange={ async (val) => {
-                await this.setState({ province: val.value, city: '' })
+                await this.setState({ province: val.value, city: '', provinceData: {} })
                 this.getDataCity(val.value)
               }}
             />
@@ -234,11 +285,13 @@ export default class InformationScreen extends Component<Props> {
               data={ dataCity }
               label='Kota'
               value={city}
-              onValueChange={ (val) => this.setState({ city: val.value }) }
+              valueTemp={ this.props.isEdit ? cityData.name : false } // valueTemp untuk value sementara jika id value tidak ada pada list
+              onValueChange={ (val) => this.setState({ city: val.value, cityData: {} }) }
             />
             <FormInput
               label='Tentukan link untuk campaign'
               value={link}
+              autoCapitalize='none'
               onChangeText={ (link) => this.setState({ link }) }
             />
 
