@@ -71,7 +71,7 @@ export default class InformationScreen extends Component<Props> {
   }
 
   getDataCategory = (init=false) => {
-    fetch('https://sharinghappiness.org/api/v1/program-category', {
+    fetch('https://sharinghappiness.org/api/v1/program-category?perPage=500', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -97,7 +97,7 @@ export default class InformationScreen extends Component<Props> {
   
   getDataProvince = (init=false) => {
     this.setState({ loading: true })
-    fetch('https://sharinghappiness.org/api/v1/masterdata/province', {
+    fetch('https://sharinghappiness.org/api/v1/masterdata/province?perPage=100', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -137,7 +137,7 @@ export default class InformationScreen extends Component<Props> {
   getDataCity = (id=null, init=false) => {
     this.setState({ loading: true })
     let uri = id ? `province/${id}` : ''
-    fetch(`https://sharinghappiness.org/api/v1/masterdata/city/${uri}`, {
+    fetch(`https://sharinghappiness.org/api/v1/masterdata/city/${uri}?perPage=600`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -233,7 +233,7 @@ export default class InformationScreen extends Component<Props> {
   render() {
     let { dataCategory, dataProvince, dataCity, category, title, targetFund, deadline, date, location, province, city, link, cityData, categoryData } = this.state
     let { data } = this.props // all data create campaign
-    console.log(data)
+    console.log('provinceprovinceprovince',province)
     return (
       <View style={{ flex: 1 }}>
         <KeyboardAwareScrollView style={ styles.container } keyboardShouldPersistTaps='handled'>

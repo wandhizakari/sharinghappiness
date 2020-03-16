@@ -59,7 +59,7 @@ class FormPicker extends Component {
   render() {
     let { label, value, valueTemp, placeholder, data } = this.props
     let findIdx = data.findIndex(e => e.value == value)
-    console.log({findIdx})
+    console.log({label, value, findIdx})
     let newPlaceholder = placeholder || 'Pilih '+label
     let valuePicker = value == '' ? newPlaceholder : findIdx != -1 ? data[findIdx].label : ''
     return (

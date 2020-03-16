@@ -67,9 +67,9 @@ export default class CreateCampaignScreen extends Component<Props> {
       case 'first':
         return  <InformationScreen
                   isEdit={ this.props.isEdit || false }
-                  dataProgram={this.props.item}
+                  dataProgram={this.props.item || null}
                   // slug={ this.props.slug }
-                  slug={this.props.item.slug}
+                  slug={ this.props.item ? this.props.item.slug : null }
                   changeTab={ (index) => this.setState({ index }) } 
                   setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
                   data={ this.state.data }
@@ -77,7 +77,7 @@ export default class CreateCampaignScreen extends Component<Props> {
       case 'second':
         return  <DescriptionScreen
                   isEdit={ this.props.isEdit || false }
-                  dataProgram={this.props.item}
+                  dataProgram={this.props.item || null}
                   changeTab={ (index) => this.setState({ index }) } 
                   setData={ (data) => this.setState({ data: { ...this.state.data, ...data } }) } 
                   data={ this.state.data }

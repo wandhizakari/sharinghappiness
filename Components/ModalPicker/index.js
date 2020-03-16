@@ -33,8 +33,8 @@ export default class ModalPicker extends Component {
   }
 
   renderItem(item, index) {
-    let bgSelected = this.props.value === item.value ? '#FFBAA3' : '#fff'
-    let textSelected = this.props.value === item.value ? '#fff' : '#FF7E50'
+    let bgSelected = this.props.value == item.value ? '#FFBAA3' : '#fff'
+    let textSelected = this.props.value == item.value ? '#fff' : '#FF7E50'
     return(
       <TouchableOpacity 
         activeOpacity={.6}
