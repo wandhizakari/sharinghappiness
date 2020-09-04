@@ -26,9 +26,12 @@ import AllProgramScreen from './Screen/AllProgramScreen';
 import KalkulatorZakatScreen from './Screen/kalkulatorZakat';
 import CreateCampaignScreen from './Screen/CreateCampaign';
 import MyCampaignScreen from './Screen/MyCampaign';
-
+import WishlistScreen from './Screen/Wishlist';
+import FaqScreen from './Screen/Faq';
+import TransactionScreen from './Screen/Transaction';
+import Test from './Screen/Test';
 import FounderScreen from './Screen/FounderScreen';
-
+import { GoogleSignin } from '@react-native-community/google-signin';
 const SimpleLineIcon= ({ title, focused }) => {
   let image;
 
@@ -37,6 +40,15 @@ const SimpleLineIcon= ({ title, focused }) => {
   return ( <Image style={{ width: 20, height: 20 }} source={require('./Images/home.png')} /> );
 
 }
+GoogleSignin.configure({
+  scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+  webClientId: '816111242740-7j9c0braeqdkvn6bpdfcbu4n61kliliv.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+  offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+  hostedDomain: '', // specifies a hosted domain restriction
+  loginHint: '', // [iOS] The user's ID, or email address, to be prefilled in the authentication UI if possible. [See docs here](https://developers.google.com/identity/sign-in/ios/api/interface_g_i_d_sign_in.html#a0a68c7504c31ab0b728432565f6e33fd)
+  forceCodeForRefreshToken: true, // [Android] related to `serverAuthCode`, read the docs link below *.
+  accountName: '', // [Android] specifies an account name on the device that should be used
+});
 const SimpleLineIcon1= ({ title, focused }) => {
   let image;
 
@@ -87,7 +99,11 @@ const App = () => {
             <Scene key='forgot' component={ForgotScreen} title='Detail' />
             <Scene key='register' component={RegisterScreen} title='Detail' />
             <Scene key='donasi' component={DonasiScreen} navBar={CustomNavBar} title='Detail'/>
+            <Scene key='wishlist' component={WishlistScreen} navBar={CustomNavBar} title='Detail'/>
+            <Scene key='faq' component={FaqScreen} navBar={CustomNavBar} title='Detail'/>
+            <Scene key='transaction' component={TransactionScreen} navBar={CustomNavBar} title='Detail'/>
             <Scene key='all' component={AllScreen} navBar={CustomNavBar} title='Detail'/>
+
             <Scene key='profileUser' component={ProfileUser} navBar={CustomNavBar} title='Detail'/>
             <Scene key='profileSetting' component={ProfileSetting} navBar={CustomNavBar} title='Pengaturan'/>
             <Scene key='tambahAlamat' component={TambahAlamat} navBar={CustomNavBar} title='Tambah Alamat'/>
@@ -102,7 +118,7 @@ const App = () => {
 
             {/* Tabs... */}
             <Scene key='tabbar' tabs={true}  hideNavBar={1} >
-              <Scene icon={SimpleLineIcon} key='home' component={HomeScreen} navBar={CustomNavBar} title="Home" back={true} />
+              <Scene icon={SimpleLineIcon} key='home' component={HomeScreen} navBar={CustomNavBar} title="Home" back={false} />
               <Scene icon={SimpleLineIcon1} key='product' component={ProductScreen} navBar={CustomNavBar} title="Program" back={true} />
 
               <Scene icon={SimpleLineIcon2} key='partner' component={PartnerScreen}  navBar={CustomNavBar}title='Partner' />

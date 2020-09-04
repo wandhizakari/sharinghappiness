@@ -99,7 +99,11 @@ export default class DescriptionScreen extends Component<Props> {
     let selectedCategory = await dataCategoryRaw.find(e => e.id == category) || '' // get/find data category by category id selected
     let selectedProvince = await dataProvinceRaw.find(e => e.id == province) || '' // get/find data province by category id selected
     let selectedCity = await dataCityRaw.find(e => e.id == city) || '' // get/find data city by category id selected
+    const myHeaders = new Headers();
 
+    myHeaders.append('Content-Type', 'application/json');
+    myHeaders.append('token', token);
+    myHeaders.append('token_email', this.state.dataSession.email);
     let { data } = this.props
     let params = {
       token: token,
@@ -133,14 +137,36 @@ export default class DescriptionScreen extends Component<Props> {
       rewards: [],
     }
     console.log({params}, JSON.stringify(params))
+    let body = new FormData();
+    body.append('user_id',this.state.dataSession.id);
+    body.append('program_category_id', parseInt(selectedCategory.id));
+    body.append('title', data.title)
+    body.append('slug', data.link)
+    body.append('highlight', data.highlight)
+    body.append('description', data.description)
+    body.append('end_date', data.deadline)
+    body.append('city_id', parseInt(selectedCity.id))
+    body.append('province_id', parseInt(selectedProvince.id))
+    body.append('optional_location_name', data.location)
+    body.append('target', parseInt(data.targetFund))
+    body.append('is_show_target', 1)
+    body.append('optional_video_url', data.urlVideo)
+    // body.append(images, [])
+    body.append('is_rewarded', 0)
+    body.append('rewards', [])
+    body.append('imagearr[]', this.state.imageData);
 
-    fetch('http://devel.sharinghappiness.org/api/v1/user/program/create', {
+
+    fetch('https://sharinghappiness.org/api/v1/user/program/create?token='+params.token+'&token_email='+params.token_email, {
       method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
+      body:  body,
+      headers:{
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, PUT, OPTIONS, DELETE',
+        'Access-Control-Allow-Headers': 'Access-Control-Allow-Methods, Access-Control-Allow-Origin, Origin, Accept, Content-Type',
+        'Accept': 'application/x-www-form-urlencoded',
+        'Content-Type':'application/x-www-form-urlencoded',
+      }
     }).then((response) => response.json())
     .then((respJson) => {
       this.setState({ loading: false })
@@ -214,11 +240,13 @@ export default class DescriptionScreen extends Component<Props> {
       rewards: [],
     }
     console.log({params}, JSON.stringify(params))
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/program/${data.idProgram}/update`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/program/${data.idProgram}/update`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        token:token,
+        token_email:this.state.dataSession.email
       },
       body: JSON.stringify(params),
     }).then((response) => response.json())
@@ -606,6 +634,7 @@ const styles = StyleSheet.create({
   },
 
 });
+
 
 
 

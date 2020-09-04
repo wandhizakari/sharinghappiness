@@ -145,7 +145,7 @@ export default class TambahAlamatScreen extends Component<Props> {
 
     console.log({params})
 
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/address/create`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/address/create`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

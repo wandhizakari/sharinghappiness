@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { SliderBox } from "react-native-image-slider-box";
 import Masonry from 'react-native-masonry-layout';
+import FastImage from 'react-native-fast-image'
+
 
 import { Actions } from 'react-native-router-flux'; // New code
 const screenWidth = Math.round(Dimensions.get('window').width); 
@@ -28,7 +30,8 @@ export default class ForgotScreen  extends Component {
             data1:[1,2,4,4],
             program:0,
             donation:0,
-            member:0
+            member:0,
+            imageData:[]
           
         }
     }
@@ -71,7 +74,7 @@ onScrollEnd( event ) {
 
     login   = async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/user/forgot-password', {
+        fetch('https://sharinghappiness.org/api/v1/user/forgot-password', {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -130,7 +133,7 @@ onScrollEnd( event ) {
     HomeBanner = async ()=>{
       let arr =[];
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/banner', {
+      fetch('https://sharinghappiness.org/api/v1/banner', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -143,10 +146,9 @@ onScrollEnd( event ) {
             console.log('baner ada')
             for(var i=0;i<responseJson.result.length;i++){
               console.log('****')
-              arr.push(responseJson.result[i].image)
-            
+              arr.push(responseJson.result[i].image_medium_cover)
             }
-            this.setState({data:arr})
+            this.setState({data:arr,imageData:responseJson.result})
             console.log(arr)
           }
           
@@ -164,7 +166,7 @@ onScrollEnd( event ) {
     
 
 
-    fetch('http://devel.sharinghappiness.org/api/v1/sdgs', {
+    fetch('https://sharinghappiness.org/api/v1/sdgs', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -174,6 +176,7 @@ onScrollEnd( event ) {
       .then((responseJson) => {
         console.log(responseJson)
         this.setState( { loading: false } );
+        if(responseJson.result){
         data = responseJson.result.map( item => {
           
           return {
@@ -183,6 +186,7 @@ onScrollEnd( event ) {
            
           }
         } );
+        }
         if ( this.state.withHeight ) {
           this.refs.list.addItemsWithHeight( data );
         } else {
@@ -194,6 +198,19 @@ onScrollEnd( event ) {
         console.error(error);
       });
    
+  }
+
+  rupiah = (bilangan) =>{
+    var	number_string = bilangan.toString(),
+      sisa 	= number_string.length % 3,
+      rupiah 	= number_string.substr(0, sisa),
+      ribuan 	= number_string.substr(sisa).match(/\d{3}/g);
+        
+    if (ribuan) {
+      var separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+    return rupiah
   }
     render() {
         return (
@@ -212,24 +229,24 @@ onScrollEnd( event ) {
 
                 <View style={{flexDirection:'column'}}>
                    <SliderBox
+                    data={this.state.imageData}
                     images={this.state.data}
-                    onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
-                    currentImageEmitter={index => console.warn(`current pos is: ${index}`)}
+                    
                     />
                 </View>
 
                 </ScrollView>
-                <ScrollView horizontal={true} contentContainerStyle={{justifyContent:'flex-start',alignContent:'flex-start',padding:0,backgroundColor:'white'}}>
+                <ScrollView horizontal={true} contentContainerStyle={{justifyContent:'flex-start',alignContent:'flex-start',padding:0,backgroundColor:'white',marginTop:10}}>
                   <View style={{width:120,height:50,backgroundColor:'black',marginRight:1,justifyContent:'center',alignItems:'center'}}>
-              <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.state.program}</Text>
+              <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.rupiah(this.state.program)}</Text>
                     <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>Programs</Text>
                   </View>
                   <View style={{width:120,height:50,backgroundColor:'black',marginRight:1,justifyContent:'center',alignItems:'center'}}>
-                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.state.donation}</Text>
+                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.rupiah(this.state.donation)}</Text>
                     <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>Donations</Text>
                   </View>
                   <View style={{width:120,height:50,backgroundColor:'black',marginRight:1,justifyContent:'center',alignItems:'center'}}>
-                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.state.member}</Text>
+                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'orange'}}>{this.rupiah(this.state.member)}</Text>
                     <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>Members</Text>
                   </View>
                   
@@ -238,14 +255,12 @@ onScrollEnd( event ) {
                 <View style={{flex: 1,flexDirection:'row',padding:10}}>
                   <TouchableOpacity 
                     activeOpacity={.6}
-                    style={{flex: 2, backgroundColor: '#65b4ce',height:50,marginRight:5,borderRadius:5,justifyContent:'center',alignItems:'center'}}
+                    style={{flex: 2, backgroundColor: '#eb6623',height:50,marginRight:5,borderRadius:5,justifyContent:'center',alignItems:'center'}}
                     onPress={()=>{ Actions.createCampaign({ title: 'Create Campaign' }) }}
                   >
                     <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>CREATE CAMPAIGN</Text>
                   </TouchableOpacity>
-                  <View style={{flex: 2, backgroundColor: '#eb6623',height:50,marginLeft:5,borderRadius:5,justifyContent:'center',alignItems:'center'}} >
-                      <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white'}}>CREATE CAMPAIGN</Text>
-                  </View>
+    
                 </View>
                 <Masonry onMomentumScrollEnd={this.onScrollEnd.bind( this )}
                style={{ flex: 1, borderWidth: 0, borderColor: "red",backgroundColor:'white' }}
@@ -270,7 +285,16 @@ onScrollEnd( event ) {
                    borderWidth: 0,
                    borderColor: "#dedede"
                  }}>
-                  <Image source={{uri:item.image}} style={{width:widthScreen /2.2, backgroundColor: 'powderblue',height:178,marginRight:5,borderRadius:5}} resizeMode="contain"/>
+                 
+                <FastImage
+                  style={{width:widthScreen /2.2, backgroundColor: '',height:178,marginRight:5,borderRadius:5}}
+                  source={{
+                      uri: item.image !== null?item.image:'https://4.bp.blogspot.com/-5CJNywQX_n8/XOOOo4bN6jI/AAAAAAAADrI/gucSk8GJDiQ6lba5obk9vaR97wo9Us7mgCLcBGAs/s1600/SH3.PNG',
+                      headers: { Authorization: 'someAuthToken' },
+                      priority: FastImage.priority.normal,
+                  }}
+                  resizeMode={FastImage.resizeMode.contain}
+              />
                </TouchableOpacity>}/>
     
           {this.state.loading && <View style={{

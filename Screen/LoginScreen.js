@@ -6,10 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  AsyncStorage
+  AsyncStorage,
+  ScrollView
 } from 'react-native';
 import { Actions } from 'react-native-router-flux'; // New code
 import { LoginButton, AccessToken, LoginManager } from 'react-native-fbsdk';
+import Snackbar from 'react-native-snackbar';
+import { GoogleSignin, GoogleSigninButton } from '@react-native-community/google-signin';
 
 
 export default class RegisterScreen  extends Component {
@@ -18,8 +21,8 @@ export default class RegisterScreen  extends Component {
         this.state={
             email:'',
             password: '',
-            email:'wandhizakari@gmail.com',
-            password: 'Password',
+            email:'',
+            password: '',
             error:false,
             message:'',
             loading:false
@@ -58,7 +61,7 @@ export default class RegisterScreen  extends Component {
 
     login = async (email=this.state.email, password=this.state.password) => {
         this.setState({loading:true})
-        fetch('http://devel.sharinghappiness.org/api/v1/user/login', {
+        fetch('https://sharinghappiness.org/api/v1/user/login', {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -70,10 +73,20 @@ export default class RegisterScreen  extends Component {
         }),
         }).then((response) => response.json())
         .then( async (responseJson) => {
-          console.log({responseJson})
             this.setState({loading:false})
-            if(responseJson.message){
+            console.log(responseJson  )
+            if(responseJson.message && responseJson.status !== 20 ){
                 this.setState({error:true,message:responseJson.message})
+                Snackbar.show({
+                  text: responseJson.message,
+                  duration: Snackbar.LENGTH_INDEFINITE,
+                  backgroundColor: '#bb0000',
+                  action: {
+                      text: 'RETRY',
+                      textColor: '#fff',
+                      onPress: () => Snackbar.dismiss(),
+                    },
+                });
             }
             if(responseJson.status == 20){
                 try {
@@ -109,7 +122,7 @@ export default class RegisterScreen  extends Component {
         });
     }
 
-    handleFacebookLogin = () => {
+    handleFacebookLogin = async () => {
         LoginManager.logInWithPermissions(['public_profile', 'email', 'user_friends']).then(
           (result) => {
             if (result.isCancelled) {
@@ -131,12 +144,12 @@ export default class RegisterScreen  extends Component {
         )
       }
 
-      initUser(token) {
+      initUser = async (token) => {
         fetch('https://graph.facebook.com/v2.5/me?fields=picture.type(large),email,gender,name,birthday,friends&access_token=' + token)
         .then((response) => response.json())
-        .then((json) => {
+        .then( async (json) => {
             console.log(json)
-            this.loginFB(json.id,token,json.email,'wandho',json.picture.data.url)
+            this.loginFB(json.id,token,json.email,json.name,json.picture.data.url)
           // Some user object has been set up somewhere, build that user here
         //   user.name = json.name
         //   user.id = json.id
@@ -145,17 +158,76 @@ export default class RegisterScreen  extends Component {
         //   user.username = json.name
         //   user.loading = false
         //   user.loggedIn = true
-        //   user.avatar = setAvatar(json.id)      
+        //   user.avatar = setAvatar(json.id)    
+            // await AsyncStorage.setItem('token', token); 
+            // await AsyncStorage.setItem('username', json.name);
+            // await AsyncStorage.setItem('email', json.email); 
+            // await AsyncStorage.setItem('dataSession', JSON.stringify(json)); 
+
         })
         .catch((error) => {
          console.log(error)
         })
       }
+      signIn = async () => {
+        try {
+          await GoogleSignin.hasPlayServices();
+          const userInfo = await GoogleSignin.signIn();
+          this.setState({ userInfo });
+        } catch (error) {
+          if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            // user cancelled the login flow
+          } else if (error.code === statusCodes.IN_PROGRESS) {
+            // operation (e.g. sign in) is in progress already
+          } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            // play services not available or outdated
+          } else {
+            // some other error happened
+          }
+        }
+      };
+      getCurrentUserInfo = async () => {
+        try {
+          const userInfo = await GoogleSignin.signInSilently();
+          this.setState({ userInfo });
+        } catch (error) {
+          if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+            // user has not signed in yet
+          } else {
+            // some other error
+          }
+        }
+      };
+      isSignedIn = async () => {
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        this.setState({ isLoginScreenPresented: !isSignedIn });
+      };
+      getCurrentUser = async () => {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        this.setState({ currentUser });
+      };
+      signOut = async () => {
+        try {
+          await GoogleSignin.revokeAccess();
+          await GoogleSignin.signOut();
+          this.setState({ user: null }); // Remember to remove the user from your app's state as well
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      revokeAccess = async () => {
+        try {
+          await GoogleSignin.revokeAccess();
+          console.log('deleted');
+        } catch (error) {
+          console.error(error);
+        }
+      };
 
       loginFB= async (id,token,email,name,picture)=>{
           console.log(id)
         this.setState({loading:true})
-        fetch('http://devel.sharinghappiness.org/api/v1/user/login/facebook', {
+        fetch('https://sharinghappiness.org/api/v1/user/login/facebook', {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -169,25 +241,39 @@ export default class RegisterScreen  extends Component {
             picture:picture
         }),
         }).then((response) => response.json())
-        .then((responseJson) => {
+        .then(async(responseJson) => {
             this.setState({loading:false})
-            if(responseJson.message){
-                this.setState({error:true,message:responseJson.message})
+            if(responseJson.message && responseJson.status !== 20){
+                // this.setState({error:true,message:responseJson.message})
+                Snackbar.show({
+                  text: responseJson.message,
+                  duration: Snackbar.LENGTH_INDEFINITE,
+                  backgroundColor: '#bb0000',
+                  action: {
+                      text: 'RETRY',
+                      textColor: '#fff',
+                      onPress: () => Snackbar.dismiss(),
+                    },
+                });
             }
+            
             if(responseJson.status == 20){
                 try {
                     AsyncStorage.setItem('logined', 'true');
                     const value = AsyncStorage.getItem('logined')
                     console.log(value)
+                    console.log('------+++----')
                     
                     if(value){
                         console.log(responseJson)
                         Actions.home({title: 'Home'})
 
                         if(responseJson.result){
-                            AsyncStorage.setItem('username', responseJson.result.name);
-                            AsyncStorage.setItem('token', value.result.token); 
-                            AsyncStorage.setItem('profile_picture', value.result.picture_thumbnail); 
+                          await AsyncStorage.setItem('token', responseJson.result.token); 
+                          await AsyncStorage.setItem('username', responseJson.result.name);
+                          await AsyncStorage.setItem('email', email); 
+                          await AsyncStorage.setItem('password', password); 
+                          await AsyncStorage.setItem('dataSession', JSON.stringify(responseJson.result)); 
                         }
                     }else{
                         console.log('false')
@@ -208,36 +294,46 @@ export default class RegisterScreen  extends Component {
     render () {
         
         return (
-            <View style={styles.container}>
-                
+            <ScrollView style={styles.container} contentContainerStyle={{ justifyContent: 'center',alignItems: 'center',}}>
+                <Image style={{width:200,alignSelf:'center', height:120,top:'10%' }} resizeMode='contain' source={{uri:"https://sharinghappiness.org/files/contentimages/a05b1d7b47ab2b13c4c5c0679d3b1684-20180416142358-tentang-kami_thumbnail_x480.png"}}/>
                 <View style={{height:46,flexDirection:'row',marginTop:100}}>
-                    <View style={{flexDirection:'row',justifyContent:'space-between', borderTopLeftRadius:3,borderBottomLeftRadius:3,width:170,height:46,justifyContent:'center',alignItems:'center', borderColor:'gray',borderWidth:1,borderStyle:'solid'}}>
-                        <Text style={{marginRight:5}}>LOGIN BY GOOGLE</Text>
-                        <Image style={{width:14,height:14}} resizeMode='cover' source={require('../Images/google.png')}/>
+                    {
+                    //   <View style={{flexDirection:'row',justifyContent:'space-between', borderTopLeftRadius:3,borderBottomLeftRadius:3,width:170,height:46,justifyContent:'center',alignItems:'center', borderColor:'gray',borderWidth:1,borderStyle:'solid'}}>
+                    //     <Text style={{marginRight:5}}>LOGIN BY GOOGLE</Text>
+                    //     <Image style={{width:14,height:14}} resizeMode='cover' source={require('../Images/google.png')}/>
 
-                    </View> 
-                    <TouchableOpacity onPress={()=>this.handleFacebookLogin()} style={{flexDirection:'row',width:170,height:46,backgroundColor:'#3b5998',borderTopRightRadius:3,borderBottomRightRadius:3,justifyContent:'center',alignItems:'center'}}>
+                    // </View>
+                     }
+                    {
+                      <TouchableOpacity onPress={()=>this.handleFacebookLogin()} style={{flexDirection:'row',width:'83%',height:46,backgroundColor:'#3b5998',borderRadius:5,justifyContent:'center',alignItems:'center',padding:10}}>
+                         <Image style={{width:14,height:14, marginRight:10}} resizeMode='cover' source={require('../Images/facebook-logo.png')}/>
                         <Text style={{color:'white',marginRight:5}}>LOGIN BY FACEBOOK</Text> 
-                        <Image style={{width:14,height:14}} resizeMode='cover' source={require('../Images/facebook-logo.png')}/>
                     </TouchableOpacity>
+                  } 
 
                 </View>
+                <GoogleSigninButton
+                  style={{ flex:1, height: 48 ,marginTop:20}}
+                  size={GoogleSigninButton.Size.Wide}
+                  color={GoogleSigninButton.Color.Light}
+                  onPress={this._signIn}
+                  disabled={this.state.isSigninInProgress} />
                 <View style={{flexDirection:'column',position:'absolute'}}>
                     <Text style={{color:'red',fontFamily:'arial',fontSize:15,marginTop:-55}}> {this.state.message}</Text>
                 </View>
                 <View style={{flexDirection:'column',marginTop:50,paddingLeft:20,paddingRight:20}}>
                     <View style={{flexDirection:'row'}}>
                     <Image style={{width:20,height:20,left:10,top:13,position:'absolute'}} resizeMode='cover' source={require('../Images/email.png')}/>
-                        <TextInput autoCapitalize = 'none' onChangeText={text => this.onChangeText({type:'email',value:text})} value={this.state.email} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:40}} placeholder="Email"/>
+                        <TextInput autoCapitalize = 'none' onChangeText={text => this.onChangeText({type:'email',value:text})} value={this.state.email} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:300,paddingLeft:40}} placeholder="Email"/>
                     </View>
                     <View style={{flexDirection:'row'}}>
                     <Image style={{width:20,height:20,left:10,top:45,position:'absolute'}} resizeMode='cover' source={require('../Images/lock.png')}/>
-                    <TextInput type="password" autoCapitalize = 'none' onChangeText={text => this.onChangeText({type:'password',value:text})} value={this.state.password} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:40,marginTop:30}} placeholder="Password"/>
+                    <TextInput type="password" secureTextEntry={true} autoCapitalize = 'none' onChangeText={text => this.onChangeText({type:'password',value:text})} value={this.state.password} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:300,paddingLeft:40,marginTop:30}} placeholder="Password"/>
                     </View>
                     <TouchableOpacity style={{color:'#eb6623',position:'absolute',right:30,top:90}} onPress={()=>Actions.forgot({title: 'Forgot Password'})}><Text style={{color:'#eb6623'}}>Forgot?</Text></TouchableOpacity>
                 </View>
                 <View style={{flexDirection:'column'}}>
-                    <TouchableOpacity onPress={()=>this.login()} style={{width:340,borderRadius:3,height:46,backgroundColor:'#eb6623',justifyContent:'center',alignItems:'center',marginTop:30}}>
+                    <TouchableOpacity onPress={()=>this.login()} style={{width:300,borderRadius:3,height:46,backgroundColor:'#eb6623',justifyContent:'center',alignItems:'center',marginTop:30}}>
                         <Text style={{color:'white',fontFamily:'arial',fontWeight:'bold'}}>{this.state.loading?'Loading...':'LOGIN'}</Text>
                     </TouchableOpacity>
                     <Text style={{color:'white',fontFamily:'arial',fontWeight:'bold'}}>{this.state.loading?'Loading...':'LOGIN'}</Text>
@@ -249,15 +345,13 @@ export default class RegisterScreen  extends Component {
 
 
                 </View>
-            </View>
+            </ScrollView>
         );
     }
     }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: 'white',
     flexDirection:'column'
   },

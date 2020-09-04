@@ -4,9 +4,9 @@ import { Actions } from 'react-native-router-flux';
 
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS === 'ios' ? 64 : 54,
+    height: Platform.OS === 'ios' ? 100 : 54,
     flexDirection: 'row',
-    paddingTop: 20,
+    paddingTop: '5%',
   },
   navBarItem: {
     flex: 1,
@@ -31,15 +31,16 @@ export default class CustomNavBar extends React.Component {
         </TouchableOpacity>
       );
     }
-    return (
+    return this.props.title !=='Home'?this.props.title =='Payment'? <TouchableOpacity onPress={Actions.home}><Text style={{marginLeft:10,fontWeight:'bold'}}>Close</Text></TouchableOpacity>:(
       <TouchableOpacity onPress={Actions.pop} style={[styles.navBarItem, { paddingLeft: 10 }]}>
          <Image
             style={{ width: 20, height:20 }}
             resizeMode="contain"
             source={require('../Images/back.png')}
           />
-      </TouchableOpacity>
-    );
+      </TouchableOpacity>): <Image style={{width:70,height:70,position:'absolute',left:'5%'}} resizeMode='contain' source={{uri:"https://sharinghappiness.org/files/contentimages/a05b1d7b47ab2b13c4c5c0679d3b1684-20180416142358-tentang-kami_thumbnail_x480.png"}}/>
+
+    
   }
 
   _renderMiddle() {
@@ -70,7 +71,7 @@ export default class CustomNavBar extends React.Component {
 
     return (
       <View style={[styles.container, dinamicStyle,{justifyContent:'center',shadowOpacity: 0.75,elevation:1,shadowRadius: 5,shadowColor: 'gray', shadowOffset: { height: 0, width: 0 },}]}>
-        <Text style={{alignSelf:'center',position:'absolute',zIndex:99,top:30,fontWeight:'bold',fontSize:17,color:'#eb6623'}}>{this.props.title}</Text>
+        <Text style={{alignSelf:'center',position:'absolute',zIndex:99,fontWeight:'bold',fontSize:17,color:'#eb6623'}}>{this.props.title}</Text>
         {this._renderLeft()}
         {this._renderMiddle()}
         {this._renderRight()}

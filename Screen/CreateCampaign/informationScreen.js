@@ -248,7 +248,7 @@ export default class InformationScreen extends Component<Props> {
             <FormInput
               label='Judul Campaign'
               value={title}
-              onChangeText={ (title) => this.setState({ title }) }
+              onChangeText={ title => this.setState({ title }) }
               maxLength={50}
             />
             <FormInput

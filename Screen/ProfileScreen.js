@@ -20,26 +20,32 @@ export default class ForgotScreen  extends Component {
             message:'',
             data:[1,2,3,4,5,6],
             data1:[1,2,4,4],
-            username:''
+            username:'',
+            user:[]
         }
     }
-    componentDidMount = () =>{
-      AsyncStorage.getItem('logined').then((res) =>{
-          if(res != 'true'){
-              Actions.refresh({key: 'Login', hideNavBar: true});
-          }else{
-          }
-      })
-      const user = AsyncStorage.getItem('username')
-        AsyncStorage.getItem('username').then((res) =>{
-           this.setState({username:res})
-        })
-    }
-   
-
+  
     onChangeText=(e)=>{
         this.setState({email:e.value})
         
+    }
+
+    async componentDidMount() {
+      const token = await AsyncStorage.getItem('token');
+      const email = await AsyncStorage.getItem('email');
+      await this.setState({ token, email })
+      this.load()
+      AsyncStorage.getItem('logined').then((res) =>{
+        if(res != 'true'){
+            Actions.refresh({key: 'Login', hideNavBar: true});
+        }else{
+        }
+    })
+    const user = AsyncStorage.getItem('username')
+      AsyncStorage.getItem('username').then((res) =>{
+         this.setState({username:res})
+      })
+     
     }
 
     renderItem(item) {
@@ -82,29 +88,27 @@ export default class ForgotScreen  extends Component {
     )
   }
 
-    login= async ()=>{
-        console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/user/forgot-password', {
-        method: 'POST',
+    load=()=>{
+        let {token,email} = this.state
+        fetch(`https://sharinghappiness.org/api/v1/user/profile?token=${token}&token_email=${email}`, {
+        method: 'GET',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            email: this.state.email,
-        }),
         }).then((response) => response.json())
         .then((responseJson) => {
-            console.log('hellor')
+          console.log('jakarta')
           console.log(responseJson)
-          if(responseJson.status == 20){
-            alert('Link Success to send Please check  your email')
-            Actions.login({registerSuccess:true})
-          }
+          this.setState({user:responseJson.result})
+          // if(responseJson.status == 20){
+          //   alert('Link Success to send Please check  your email')
+          //   Actions.login({registerSuccess:true})
+          // }
 
-          if(responseJson.status ==30){
-              this.setState({message:responseJson.message})
-          }
+          // if(responseJson.status ==30){
+          //     this.setState({message:responseJson.message})
+          // }
         })
         .catch((error) => {
           console.error(error);
@@ -131,15 +135,15 @@ export default class ForgotScreen  extends Component {
         return (
             <ScrollView style={{flexDirection:'column',backgroundColor:'white'}}> 
                 <View style={{flex: 1,flexDirection:'row',height:142,padding:30,backgroundColor:'#eb6623'}}>
-                <View style={{width:100,height:100,borderColor:'#eb6623',borderWidth:2,borderStyle:'solid',borderRadius:50,backgroundColor:'gold'}}></View>
+                <Image style={{width:100,height:100,borderColor:'#eb6623',borderWidth:2,borderStyle:'solid',borderRadius:50,backgroundColor:'gold'}} resizeMode='cover' source={{ uri:  this.state.user &&this.state.user.picture? this.state.user.picture:'https://www.lyfemarketing.com/blog/wp-content/uploads/2018/01/smm-company.jpg'}}></Image>
                 <View style={{marginLeft:20}}>
-                  <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white',fontSize:20}}>{this.state.username}</Text>
+                  <Text style={{fontWeight:'bold',fontFamily:'arial',color:'white',fontSize:20}}>{this.state.user !== null&&this.state.user.name? this.state.user.name:null}</Text>
                   <TouchableOpacity 
                     activeOpacity={.6}
                     style={{height:40,backgroundColor:'white',justifyContent:'center',alignItems:'center', borderRadius:5,marginTop:15}}
                     onPress={ () => Actions.profileSetting({ title: 'Profile Setting' }) }
                   >
-                    <Text style={{fontFamily:'arial',color:'#eb6623',fontSize:12}}>EDIT PROFILE </Text>
+                    <Text style={{fontFamily:'arial',color:'#eb6623',fontSize:12, padding:10}}>EDIT PROFILE </Text>
                   </TouchableOpacity>
                 </View>
                   
@@ -153,15 +157,28 @@ export default class ForgotScreen  extends Component {
                 >
                   <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>My Campaign</Text>
                 </TouchableOpacity>
-                <View style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}} >
-                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>Account Setting </Text>
-                </View>
-                <View style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}} >
-                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>General Setting </Text>
-                </View>
-                <View style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}} >
-                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>About Us </Text>
-                </View>
+                <TouchableOpacity 
+                  activeOpacity={.6}
+                  style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}}
+                  onPress={ () => Actions.transaction({ title: 'My Campaign' }) }
+                >
+                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>My Transaction</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  activeOpacity={.6}
+                  style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}}
+                  onPress={ () => Actions.wishlist({ title: 'My Campaign' }) }
+                >                  
+                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>Wishlist</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  activeOpacity={.6}
+                  style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}}
+                  onPress={ () => Actions.faq({ title: 'FAQ' }) }
+                >                  
+                  <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>FAQ</Text>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={()=>{this.logout()}} style={{borderBottomColor:'#d8d9d8',borderBottomWidth:1,flex:1,height:50,justifyContent:'center',paddingLeft:20,paddingRight:20}} >
                   <Text style={{fontFamily:'arial',color:'black',fontSize:14}}>Logout</Text>
                 </TouchableOpacity>

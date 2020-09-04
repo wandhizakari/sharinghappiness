@@ -29,6 +29,8 @@ export default class ProfileSettingScreen extends Component<Props> {
     }
   }
 
+  
+
   changeTab = (index) => {
     this.setState({ index })
   }

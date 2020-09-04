@@ -144,7 +144,7 @@ export default class ForgotScreen  extends Component {
 
     getBank= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/payment-method', {
+        fetch('https://sharinghappiness.org/api/v1/payment-method', {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -164,7 +164,7 @@ export default class ForgotScreen  extends Component {
     }
     sendDonation= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=10000&mount='+this.state.mount+'&message='+this.state.message, {
+      fetch('https://sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=10000&mount='+this.state.mount+'&message='+this.state.message, {
       method: 'POST',
       headers: {
           Accept: 'application/json',
@@ -172,7 +172,7 @@ export default class ForgotScreen  extends Component {
       },
       }).then((response) => response.json())
       .then((responseJson) => {
-        console.log('http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=10000&mount='+this.state.mount+'&message='+this.state.message)
+        console.log('https://sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=10000&mount='+this.state.mount+'&message='+this.state.message)
        console.log(responseJson)
        
         
@@ -192,7 +192,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -221,13 +221,15 @@ export default class ForgotScreen  extends Component {
         return (
             <ScrollView style={{flexDirection:'column',backgroundColor:'white'}}> 
                 <View style={{flexDirection:'column',marginTop:30,paddingLeft:20,paddingRight:20}}>
-                <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:12}}>Batas Pembayaran 12 jam</Text>
+                <Text style={{fontWeight:'bold',backgroundColor:'green',padding:10,color:'white', fontFamily:'arial',marginTop:10,fontSize:12}}>Cek email anda untuk detail cara pembayaran donasi</Text>
+
+                  <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:12}}>Batas Pembayaran 12 jam</Text>
 
                   <TouchableOpacity style={{flex:1,borderColor:'#eeeeee',borderStyle:'solid',borderWidth:1,borderRadius:5,marginTop:20,padding:20}}>
                   <View style={{flexDirection:'row',alignItems:'center'}}>
                   <Text style={{fontSize:14,width:131,marginTop:10,marginLeft:10}}>Nomer Tagihan</Text>
 
-                    <View style={{backgroundColor:'#f2f5f9',padding:5,borderRadius:5}}><Text style={{fontSize:12,width:131,marginTop:10,marginLeft:10}}>{this.props.item.transaction_number}</Text></View>
+                    <View style={{backgroundColor:'#f2f5f9',padding:5,borderRadius:5}}><Text style={{fontSize:12,width:131,marginTop:10,marginLeft:10,fontWeight:'bold'}}>{this.props.item.transaction_number}</Text></View>
                    
                   </View>
                     <Text style={{fontSize:14,alignSelf:'center',width:131,marginTop:10,marginLeft:10}}>Jumlah Donasi</Text>

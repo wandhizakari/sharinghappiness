@@ -3,20 +3,18 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
-  ScrollView,
-  FlatList,
+  ImageBackground,
   Image,
   Dimensions,
   RefreshControl
 } from 'react-native';
 import { Actions } from 'react-native-router-flux'; // New code
-const widthScreen = Dimensions.get('window').width
-const heightScreen = Dimensions.get('window').height
+
 import Masonry from 'react-native-masonry-layout';
+import Snackbar from 'react-native-snackbar';
+const widthScreen = Dimensions.get('window').width
 const { width } = Dimensions.get( "window" );
-const columnWidth = ( width - 10 ) / 2 - 10;
 export default class ForgotScreen  extends Component {
     constructor(props){
         super(props);
@@ -37,8 +35,8 @@ export default class ForgotScreen  extends Component {
 
 
     componentWillMount(){
-      this.getProgram()
-      this.getProgram1()
+      // this.getProgram()
+      // this.getProgram1()
       this.load()
     }
 
@@ -65,15 +63,22 @@ export default class ForgotScreen  extends Component {
       this.setState( { loading: true ,index:this.state.index+1} );
       let url =''
       if(this.props.title == 'Latest'){
-        url='http://devel.sharinghappiness.org/api/v1/program?page='
+        url='https://sharinghappiness.org/api/v1/program?page='+this.state.index
       }else if(this.props.title == 'Most Founded'){
-        url='http://devel.sharinghappiness.org/api/v1/program?filter=popular&page='
+        url='https://sharinghappiness.org/api/v1/program?filter=popular&page='+this.state.index
+      }else if(this.props.title == 'Zakat'){
+        url='https://sharinghappiness.org/api/v1/program/category/zakat?page='+this.state.index
+      }else if(this.props.title == 'Infaq'){
+        url='https://sharinghappiness.org/api/v1/program/category/infaq?page='+this.state.index
+      }else if(this.props.title == 'Sodaqoh'){
+        url='https://sharinghappiness.org/api/v1/program/category/sodaqoh?page='+this.state.index
+      }else if(this.props.title == 'Waqaf'){
+        url='https://sharinghappiness.org/api/v1/program/category/waqaf?page='+this.state.index
       }else{
-        url='http://devel.sharinghappiness.org/api/v1/program/end-soon?page='
+        url='https://sharinghappiness.org/api/v1/program/end-soon?page='+this.state.index
       }
 
-
-      fetch(url+this.state.index, {
+      fetch(url, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -81,33 +86,36 @@ export default class ForgotScreen  extends Component {
         },
         }).then((response) => response.json())
         .then((responseJson) => {
-          //   console.log(responseJson)
-          // let img =[]
-          // for(var a =0;a<responseJson.result.length;a++){
-          //   img.push({image:responseJson.result[a].cover_picture.image,title:responseJson.result[a].title,location:responseJson.result[a].optional_location_name,date:responseJson.result[a].end_date,terkumpul:responseJson.result[a].collected,total:responseJson.result[a].target,user:responseJson.result[a].user.name})
-
-          // }
-          // this.setState({image:img})
-          // console.log(img)
-          // if(responseJson.result && responseJson.result.length>0){
-          //   this.setState({data:responseJson.result})
-          // }
+          // alert(JSON.stringify(responseJson.result))
+          console.log(JSON.stringify(responseJson.result))
+          console.log('koreaaaakkkk')
 
           this.setState( { loading: false } );
-          data = responseJson.result.map( item => {
-            
-            return {
-              image: item.cover_picture != null?item.cover_picture.image:item.galleries[0].image,
-              text: item.title,
-              height: 150,
-              slug:item.slug,
+          if(responseJson.result !=null && this.props.title == 'Zakat' || this.props.title == 'Infaq'|| this.props.title == 'Shodaqoh' || this.props.title == 'Waqaf'){
+         
+            data = responseJson.result?responseJson.result.data.map( item => {
+              return item
+            } ):null;
+          }else{
+            if(responseJson.result != null){
+             data = responseJson.result.map( item => {
+                return item
+              } );
             }
-          } );
+            if (responseJson.result == null) {
+              Snackbar.show({
+                text: responseJson.message,
+                duration: Snackbar.LENGTH_LONG,
+                backgroundColor: '#bb0000',
+              })
+            } 
+          }
           if ( this.state.withHeight ) {
             this.refs.list.addItemsWithHeight( data );
           } else {
             this.refs.list.addItems( data );
           }
+         
           
         })
         .catch((error) => {
@@ -124,7 +132,7 @@ export default class ForgotScreen  extends Component {
     onScrollEnd( event ) {
       const scrollHeight = Math.floor( event.nativeEvent.contentOffset.y + event.nativeEvent.layoutMeasurement.height );
       const height = Math.floor( event.nativeEvent.contentSize.height );
-      if ( scrollHeight >= height ) {
+      if ( scrollHeight >= height && this.props.title != 'Zakat' ) {
         this.load();
       }
     }
@@ -183,10 +191,10 @@ export default class ForgotScreen  extends Component {
         console.log(this.state)
         const url= ''
         if(this.props.title == 'Latest'){
-          url='http://devel.sharinghappiness.org/api/v1/program'
+          url='https://sharinghappiness.org/api/v1/program'
         }
         
-        fetch('http://devel.sharinghappiness.org/api/v1/program?order='+order, {
+        fetch('https://sharinghappiness.org/api/v1/program?order='+order, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -195,16 +203,7 @@ export default class ForgotScreen  extends Component {
         }).then((response) => response.json())
         .then((responseJson) => {
             console.log(responseJson)
-          let img =[]
-          for(var a =0;a<responseJson.result.length;a++){
-            img.push({image:responseJson.result[a].cover_picture.image,title:responseJson.result[a].title,location:responseJson.result[a].optional_location_name,date:responseJson.result[a].end_date,terkumpul:responseJson.result[a].collected,total:responseJson.result[a].target,user:responseJson.result[a].user.name})
-
-          }
-          this.setState({image:img})
-          console.log(img)
-          if(responseJson.result && responseJson.result.length>0){
             this.setState({data:responseJson.result})
-          }
           
         })
         .catch((error) => {
@@ -213,7 +212,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -222,13 +221,7 @@ export default class ForgotScreen  extends Component {
       }).then((response) => response.json())
       .then((responseJson) => {
           console.log(responseJson)
-        let img =[]
-        for(var a =0;a<responseJson.result.length;a++){
-          img.push({image:responseJson.result[a].cover_picture.image,title:responseJson.result[a].title,location:responseJson.result[a].optional_location_name,date:responseJson.result[a].end_date,terkumpul:responseJson.result[a].collected,total:responseJson.result[a].target})
-
-        }
-        this.setState({data:img})
-        console.log(img)
+          this.setState({data:responseJson.result})
         
         
       })
@@ -244,6 +237,45 @@ export default class ForgotScreen  extends Component {
     
 
 
+  }
+  rupiah = (bilangan) =>{
+    var	number_string = bilangan.toString(),
+      sisa 	= number_string.length % 3,
+      rupiah 	= number_string.substr(0, sisa),
+      ribuan 	= number_string.substr(sisa).match(/\d{3}/g);
+        
+    if (ribuan) {
+      var separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+    return rupiah
+  }
+
+  renderContent(item){
+    var persen = (item.collected/item.target)*100
+    if(item.collected){
+    var total = this.rupiah(item.collected)
+    }else{
+    var total =0
+    }
+    if(item.cover_picture&&item.cover_picture.image_small_cover && item.cover_picture.image_small_cover!==null){
+      var image =item.cover_picture.image_small_cover 
+    }else{
+       // var image = item.galleries[0].image
+      var image =item.galleries.length >=1?item.galleries[0].image: "https://4.bp.blogspot.com/-5CJNywQX_n8/XOOOo4bN6jI/AAAAAAAADrI/gucSk8GJDiQ6lba5obk9vaR97wo9Us7mgCLcBGAs/s1600/SH3.PNG"
+    }
+     return(
+     <ImageBackground source={{ uri:image }} borderRadius={10} style={{width:'100%',height:161,fontFamily:'inter',justifyContent:'flex-end',marginRight:10}}>
+      <View style={{backgroundColor:'#00000063',borderBottomLeftRadius:0,borderBottomRightRadius:0, width:'100%',alignItems:'center',justifyContent:'space-between',flexDirection:'row',padding:10}}>
+        <View>
+        <Text style={{fontSize:12,fontWeight:'bold',color:'white',width:200,height:30}}>{item.title}</Text>
+        <Text style={{fontSize:12,color:'white',marginTop:5}}>Terkumpul Rp.{total}</Text>
+        </View>
+        <View style={{backgroundColor:'white',width:41,height:41,borderRadius:21,justifyContent:'center',alignItems:'center'}}>
+          <Text style={{fontSize:14,fontWeight:'bold'}}>{persen.toFixed(0)}%</Text>
+        </View>
+      </View>
+    </ImageBackground>)
   }
     render() {
         let items =0
@@ -264,7 +296,7 @@ export default class ForgotScreen  extends Component {
                  progressBackgroundColor="#ffff00"
                />}
                renderItem={item => <TouchableOpacity
-                  onPress={()=>{Actions.Detail({title:'details',slug:item.slug})}} 
+                  onPress={()=>{Actions.Detail({title:'details',slug:item.slug,zakat:this.props.title == 'Zakat'?true:false})}} 
                  style={{
                    margin: 5,
                    backgroundColor: "#fff",
@@ -273,8 +305,7 @@ export default class ForgotScreen  extends Component {
                    borderWidth: 1,
                    borderColor: "#dedede"
                  }}>
-                 <Image source={{ uri: item.image }} style={{ height: item.height }} />
-                 <Text style={{ padding: 5, color: "#444", fontWeight:'bold' }}>{item.text}</Text>
+                 {this.renderContent(item)}
                </TouchableOpacity>}/>
     
           {this.state.loading && <View style={{

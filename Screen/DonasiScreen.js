@@ -83,6 +83,18 @@ export default class ForgotScreen  extends Component {
           </TouchableOpacity>
       )
   }
+  rupiah = (bilangan) =>{
+    var	number_string = bilangan.toString(),
+      sisa 	= number_string.length % 3,
+      rupiah 	= number_string.substr(0, sisa),
+      ribuan 	= number_string.substr(sisa).match(/\d{3}/g);
+        
+    if (ribuan) {
+      var separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+    return rupiah
+  }
 
   renderBank = (item,image) => {
 
@@ -129,7 +141,7 @@ export default class ForgotScreen  extends Component {
 
     getBank= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/payment-method', {
+        fetch('https://sharinghappiness.org/api/v1/payment-method', {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -168,8 +180,8 @@ export default class ForgotScreen  extends Component {
       });
   }
     sendDonation= async ()=>{
-      console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=10000&mount='+this.state.mount+'&message='+this.state.message, {
+      alert(this.state.mount)
+      fetch('https://sharinghappiness.org/api/v1/program/'+this.props.slug+'/donate?token='+this.state.token+'&token_email=wandhizakari@gmail.com&program_id='+this.props.id+'&payment_method_id='+this.state.bankId+'&custom_usename=anonim&quantity=1&base_amount=660000&amount='+this.state.mount+'&message='+this.state.message, {
       method: 'POST',
       headers: {
           Accept: 'application/json',
@@ -177,6 +189,7 @@ export default class ForgotScreen  extends Component {
       },
       }).then((response) => response.json())
       .then((responseJson) => {
+      console.log('kakak')
        console.log(responseJson)
        if(responseJson.status == '20'){
         Actions.donasiDone({title: 'Payment',item:responseJson.result})
@@ -199,7 +212,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -229,17 +242,17 @@ export default class ForgotScreen  extends Component {
             <ScrollView style={{flexDirection:'column',backgroundColor:'white'}}> 
                 <View style={{flexDirection:'column',marginTop:50,paddingLeft:20,paddingRight:20}}>
                     {this.props.zakat?<Text>Zakat</Text>:null}
-                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:11}}>Total donasi</Text>
-                    {!this.state.nomi?<TextInput autoCapitalize = 'none' onChangeText={text => this.setState({mount:text})} value={this.state.mount} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:25}} placeholder="Total Donasi"/>:<View autoCapitalize = 'none' onChangeText={text => this.setState({total:text})} value={this.state.total} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:25,flexDirection:'row'}} placeholder="Total income"><Text style={{alignSelf:'flex-start',marginTop:15}}>{this.state.total}</Text><TouchableOpacity onPress={()=>this.setState({nomi:false})}><Image style={{width:10,top:-8,marginLeft:10}} resizeMode='contain' source={require('../Images/close.png')}></Image></TouchableOpacity></View>}
-                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:11}}>Komentar Anda</Text>
-                    <TextInput autoCapitalize = 'none' onChangeText={text => this.onChangeText({type:'password',message:text})} value={this.state.message} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:25,marginTop:0}} placeholder="Your Name"/>
+                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:14,marginBottom:10}}>Total donasi</Text>
+                    {!this.state.nomi?<TextInput autoCapitalize = 'none' onChangeText={text => this.setState({mount:text})}  value={this.state.mount} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:'100%',paddingLeft:25}} placeholder="Total Donasi"/>:<View autoCapitalize = 'none' onChangeText={text => this.setState({total:text})} value={this.state.total} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:340,paddingLeft:25,flexDirection:'row'}} placeholder="Total income"><Text style={{alignSelf:'flex-start',marginTop:15}}>{this.state.total}</Text><TouchableOpacity onPress={()=>this.setState({nomi:false})}><Image style={{width:10,top:-8,marginLeft:10}} resizeMode='contain' source={require('../Images/close.png')}></Image></TouchableOpacity></View>}
+                    <Text style={{fontWeight:'bold',fontFamily:'arial',color:'#eb6623',marginTop:20,fontSize:14,marginBottom:10}}>Komentar Anda</Text>
+                    <TextInput autoCapitalize = 'none' onChangeText={text=> this.setState({message:text})} value={this.state.message} style={{height:46,borderRadius:3,borderColor:'gray',borderWidth:1,width:'100%',paddingLeft:25,marginTop:0}} placeholder="Your Name"/>
                     <FlatList
                       style={{width:'100%'}}
                       numRows={9}
                       data={this.state.bank?this.state.bank:null}
                       renderItem={({ item}) => this.renderBank(item)}
                     />
-                    <TouchableOpacity onPress={()=>this.sendDonation()} style={{width:340,borderRadius:3,height:46,backgroundColor:'#eb6623',justifyContent:'center',alignItems:'center',marginTop:30}}>
+                    <TouchableOpacity onPress={()=>this.sendDonation()} style={{width:'100%',marginBottom:10, borderRadius:3,height:46,backgroundColor:'#eb6623',justifyContent:'center',alignItems:'center',marginTop:30}}>
                         <Text style={{color:'white',fontFamily:'arial',fontWeight:'bold'}}>BAYAR SEKARANG </Text>
                     </TouchableOpacity>
                 </View>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  ImageBackground,
   Image,
   Dimensions,
   RefreshControl
@@ -62,12 +63,12 @@ export default class ForgotScreen  extends Component {
   }
 
     load() {
-      this.setState( { loading: true ,index:this.state.index+1} );
+      this.setState( { loading: true} );
       let url ='https://sharinghappiness.org/api/v1/program/sdgs/'
       
 
 
-      fetch(url+this.props.id, {
+      fetch(url+this.props.id+'&page='+this.state.index, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -87,17 +88,11 @@ export default class ForgotScreen  extends Component {
           // if(responseJson.result && responseJson.result.length>0){
           //   this.setState({data:responseJson.result})
           // }
+          // this.setState( { index:this.state.index+1} );
+
 
           this.setState( { loading: false } );
-            data = responseJson.result.data.map( item => {
-              
-              return {
-                image: item.cover_picture != null?item.cover_picture.image:'http://devel.sharinghappiness.org/assets/img/logo.png',
-                text: item.title,
-                height: 150,
-                slug:item.slug,
-              }
-            } );
+            data = responseJson.result.data
             if ( this.state.withHeight ) {
               this.refs.list.addItemsWithHeight( data );
             } else {
@@ -120,10 +115,21 @@ export default class ForgotScreen  extends Component {
       const scrollHeight = Math.floor( event.nativeEvent.contentOffset.y + event.nativeEvent.layoutMeasurement.height );
       const height = Math.floor( event.nativeEvent.contentSize.height );
       if ( scrollHeight >= height ) {
-        this.load();
+        // this.load();
       }
     }
-
+    rupiah = (bilangan) =>{
+      var	number_string = bilangan.toString(),
+        sisa 	= number_string.length % 3,
+        rupiah 	= number_string.substr(0, sisa),
+        ribuan 	= number_string.substr(sisa).match(/\d{3}/g);
+          
+      if (ribuan) {
+        var separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+      }
+      return rupiah
+    }
     renderItem(item,image) {
 
       var json = JSON.parse(JSON.stringify(item));
@@ -178,10 +184,10 @@ export default class ForgotScreen  extends Component {
         console.log(this.state)
         const url= ''
         if(this.props.title == 'Latest'){
-          url='http://devel.sharinghappiness.org/api/v1/program'
+          url='https://sharinghappiness.org/api/v1/program'
         }
         
-        fetch('http://devel.sharinghappiness.org/api/v1/program?order='+order, {
+        fetch('https://sharinghappiness.org/api/v1/program?order='+order, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -208,7 +214,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
@@ -231,14 +237,35 @@ export default class ForgotScreen  extends Component {
         console.error(error);
       });
   }
+  renderContent(item){
+    var persen = (item.collected/item.target)*100
+    if(item.collected){
+    var total = this.rupiah(item.collected)
+    }else{
+    var total =0
+    }
+    if(item.cover_picture&&item.cover_picture.image_small_cover && item.cover_picture.image_small_cover!==null){
+      var image =item.cover_picture.image_small_cover 
+    }else{
+      var image =item.galleries.length >=1?item.galleries[0].image: "https://4.bp.blogspot.com/-5CJNywQX_n8/XOOOo4bN6jI/AAAAAAAADrI/gucSk8GJDiQ6lba5obk9vaR97wo9Us7mgCLcBGAs/s1600/SH3.PNG"
 
+    }
+     return(
+     <ImageBackground source={{ uri:image }} borderRadius={10} style={{width:'100%',height:161,fontFamily:'inter',marginTop:10,justifyContent:'flex-end',marginRight:10}}>
+      <View style={{backgroundColor:'#00000063',borderBottomLeftRadius:0,borderBottomRightRadius:0, width:'100%',alignItems:'center',justifyContent:'space-between',flexDirection:'row',padding:10}}>
+        <View>
+        <Text style={{fontSize:12,fontWeight:'bold',color:'white',width:200,height:30}}>{item.title}</Text>
+        <Text style={{fontSize:12,color:'white',marginTop:5}}>Terkumpul Rp.{total}</Text>
+        </View>
+        <View style={{backgroundColor:'white',width:41,height:41,borderRadius:21,justifyContent:'center',alignItems:'center'}}>
+          <Text style={{fontSize:14,fontWeight:'bold'}}>{persen.toFixed(0)}%</Text>
+        </View>
+      </View>
+    </ImageBackground>)
+  }
   onRefresh = () => {
-    this.setState({isRefreshing:false,withHeight:false})
-    // this.refs.list.addItemsWithHeight({});
-    this.load()
-    
-
-
+    this.setState({isRefreshing:false,withHeight:true})
+    // this.load()
   }
     render() {
         let items =0
@@ -261,17 +288,9 @@ export default class ForgotScreen  extends Component {
                renderItem={item => <TouchableOpacity
                   onPress={()=>{Actions.Detail({title:'details',slug:item.slug})}} 
                  style={{
-                   margin: 5,
-                   paddingBottom:10,
-                   padding:30,
-                   backgroundColor: "#fff",
-                   borderRadius: 5,
-                   overflow: "hidden",
-                   borderWidth: 1,
-                   borderColor: "#dedede"
+                  
                  }}>
-                 <Image source={{ uri: item.image }} style={{ height: item.height }} resizeMode='contain' />
-                 <Text style={{ padding: 5, color: "#444", fontWeight:'bold' }}>{item.text}</Text>
+                 {this.renderContent(item)}
                </TouchableOpacity>}/>
     
           {this.state.loading && <View style={{

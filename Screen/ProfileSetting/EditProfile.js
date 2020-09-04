@@ -9,6 +9,7 @@ import {
   AsyncStorage,
   TextInput
 } from 'react-native';
+import { Actions } from 'react-native-router-flux'; // New code
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImagePicker from 'react-native-image-picker';
 import Snackbar from 'react-native-snackbar';
@@ -73,7 +74,7 @@ export default class EditProfileScreen extends Component<Props> {
 
   getDataProfile = async () => {
     let { token, email } = this.state
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/profile?token=${token}&token_email=${email}`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/profile?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -85,7 +86,7 @@ export default class EditProfileScreen extends Component<Props> {
       console.log('getDataProfile', respJson)
       if (respJson.status == 20) {
         let data = respJson.result
-        this.setState({ name: data.name, phone: data.phone_number })
+        this.setState({ name: data.name, phone: data.phone_number, image:data.picture })
       } else {
         Snackbar.show({
           text: respJson.message,
@@ -111,15 +112,15 @@ export default class EditProfileScreen extends Component<Props> {
     params.append('bio', '')
     params.append('picture', {
       uri: picture.uri,
-      type: picture.type,
       name: picture.fileName
     });
     
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/profile`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/profile?token=`+token+'&token_email='+email, {
       method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+      headers:{
+       
+         'Accept': 'application/x-www-form-urlencoded',
+        'Content-Type':'application/x-www-form-urlencoded',
       },
       body: JSON.stringify(params)
     }).then((response) => response.json())
@@ -136,6 +137,7 @@ export default class EditProfileScreen extends Component<Props> {
             backgroundColor: '#4BB543'
           });
           this.getDataProfile()
+          Actions.pop()
         }
       } else {
         Snackbar.show({
@@ -158,7 +160,7 @@ export default class EditProfileScreen extends Component<Props> {
       password: newPassword,
       confirm_password: newPasswordConfirm
     }
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/password`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/password`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -202,6 +204,7 @@ export default class EditProfileScreen extends Component<Props> {
             />
 
             <View style={ styles.formWrapper }>
+            <Image style={{width:50,marginTop:10,marginBottom:10,height:50,borderColor:'transparent',borderWidth:2,borderStyle:'solid',borderRadius:4,backgroundColor:'gold'}} resizeMode='cover' source={{ uri:  this.state.picture.uri? this.state.picture.uri:this.state.image}}></Image>
               <View style={ styles.formTitle }>
                 <Text style={ styles.lbForm }>Profile Picture</Text>
               </View>

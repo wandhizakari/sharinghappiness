@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AsyncStorage, Dimensions, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { AsyncStorage, Dimensions, FlatList,ImageBackground, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import { Actions } from 'react-native-router-flux';
 const widthScreen = Dimensions.get('window').width;
@@ -27,7 +27,7 @@ export default class ForgotScreen extends Component {
     this.setState({ loading: true })
     let { token, email } = this.state
 
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/program?token=${token}&token_email=${email}`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/program?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -40,20 +40,20 @@ export default class ForgotScreen extends Component {
         let data = [];
         this.setState({loading: false});
         if (responseJson.result) {
-          for (var a = 0; a < responseJson.result.length; a++) {
-            data.push({
-              image: responseJson.result[a].cover_picture ? responseJson.result[a].cover_picture.image : '',
-              title: responseJson.result[a].title,
-              location: responseJson.result[a].optional_location_name,
-              date: responseJson.result[a].end_date,
-              terkumpul: responseJson.result[a].collected,
-              total: responseJson.result[a].target,
-              slug: responseJson.result[a].slug,
-              id: responseJson.result[a].id,
-              user: responseJson.result[a].user.name,
-              dataRaw: responseJson.result[a]
-            });
-          }
+          // for (var a = 0; a < responseJson.result.length; a++) {
+          //   data.push({
+          //     image: responseJson.result[a].cover_picture ? responseJson.result[a].cover_picture.image : '',
+          //     title: responseJson.result[a].title,
+          //     location: responseJson.result[a].optional_location_name,
+          //     date: responseJson.result[a].end_date,
+          //     terkumpul: responseJson.result[a].collected,
+          //     total: responseJson.result[a].target,
+          //     slug: responseJson.result[a].slug,
+          //     id: responseJson.result[a].id,
+          //     user: responseJson.result[a].user.name,
+          //     dataRaw: responseJson.result[a]
+          //   });
+          // }
         }
         Snackbar.show({
           text: responseJson.message,
@@ -62,7 +62,7 @@ export default class ForgotScreen extends Component {
         })
         console.log({data});
         if (responseJson.result && responseJson.result.length > 0) {
-          this.setState({ data });
+          this.setState({ data:responseJson.result });
         }
         this.setState({ loading: false })
       })
@@ -74,7 +74,7 @@ export default class ForgotScreen extends Component {
     this.setState({ loading: true })
     let { token, email } = this.state
 
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/program/delete/${id}?token=${token}&token_email=${email}`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/program/delete/${id}?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -112,6 +112,47 @@ export default class ForgotScreen extends Component {
       </View>
     )
   }
+  renderContent(item){
+    var persen = (item.collected/item.target)*100
+    if(item.collected){
+    var total = this.rupiah(item.collected)
+    }else{
+    var total =0
+    }
+     return(
+      <TouchableOpacity  
+      activeOpacity={.6}
+      style={{marginBottom:10}}
+      onPress={ () => Actions.Detail({ title: 'details', slug: item.slug,creator:true }) }
+      onLongPress={() => {
+        Alert.alert(
+          item.title,
+          '',
+          [
+            {
+              text: 'Edit',
+              onPress: () => Actions.createCampaign({ title: 'Edit Campaign', isEdit: true, item: item.dataRaw }),
+            },
+            {text: 'Delete', onPress: () => this.deleteProgram(item.id) },
+            {text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
+          ],
+          {cancelable: false},
+        );
+      }}
+    >
+     <ImageBackground source={{ uri:item.cover_picture?item.cover_picture.image_small_cover: "https://reactjs.org/logo-og.png" }} borderRadius={10} style={{width:'100%',height:161,fontFamily:'inter',justifyContent:'flex-end'}}>
+      <View style={{backgroundColor:'#00000063',borderBottomLeftRadius:10,borderBottomRightRadius:10, width:'100%',alignItems:'center',justifyContent:'space-between',flexDirection:'row',padding:10}}>
+        <View>
+        <Text style={{fontSize:12,fontWeight:'bold',color:'white',width:129,height:30}}>{item.title}</Text>
+        <Text style={{fontSize:12,color:'white',marginTop:5}}>Terkumpul Rp.{total}</Text>
+        </View>
+        <View style={{backgroundColor:'white',width:41,height:41,borderRadius:21,justifyContent:'center',alignItems:'center'}}>
+          <Text style={{fontSize:14,fontWeight:'bold'}}>{persen.toFixed(0)}%</Text>
+        </View>
+      </View>
+    </ImageBackground>
+    </TouchableOpacity>)
+  }
 
   renderItem(item, index) {
     var width = (150*item.terkumpul)/item.total
@@ -137,18 +178,7 @@ export default class ForgotScreen extends Component {
           );
         }}
       >
-        <Image style={{width:150,height:100, resizeMode: 'cover'}} resizeMethod='resize' source={{ uri: item.image }} />
-        
-        <View style={{flexDirection:'column',marginLeft:10}}>
-          <Text numberOfLines={2} style={{fontSize:14,width:150}}>{ item.title }</Text>
-          <View style={{flexDirection:'row',alignItems:'flex-start',marginTop:10}}>
-          <Image style={{width:10,height:10}} resizeMode='cover' source={require('../Images/price-tag.png')} />
-            <View style={{height:30,marginRight:5,borderRadius:5,marginLeft:10}}>
-              <Text numberOfLines={1} style={{fontWeight:'bold',fontFamily:'arial',color:'#9da2b3',fontSize:11}}>{item.user}</Text>
-            </View>
-          </View>
-          <View style={{height:5,width:150,backgroundColor:'#fcebd2',borderRadius:3}}><View style={{height:5,width:width?width:0,backgroundColor:'orange',borderRadius:3}}></View></View>
-        </View>
+       
       </TouchableOpacity>
     )
   }
@@ -157,7 +187,7 @@ export default class ForgotScreen extends Component {
     return (
       <View style={ styles.container }>
         <FlatList
-          style={{width: '100%', flexDirection: 'column'}}
+          style={{flexDirection: 'column',padding:10}}
           refreshControl={
             <RefreshControl
               refreshing={this.state.loading}
@@ -172,7 +202,7 @@ export default class ForgotScreen extends Component {
           numRows={1}
           data={this.state.data }
           extraData={this.state.data }
-          renderItem={({item, index}) => this.renderItem(item, index)}
+          renderItem={({item, index}) =>  this.renderContent(item)}
           ListEmptyComponent={ this.renderEmpty() }
           keyExtractor={ (item, index) => 'key'+index }
         />

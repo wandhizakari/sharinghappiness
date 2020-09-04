@@ -69,7 +69,7 @@ export default class ForgotScreen  extends Component {
 
     getProfile= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/profile/program/'+this.props.profileId, {
+        fetch('https://sharinghappiness.org/api/v1/profile/program/'+this.props.profileId, {
         method: 'GET',
         headers: {
             Accept: 'application/json',

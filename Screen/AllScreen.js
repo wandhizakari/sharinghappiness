@@ -66,9 +66,9 @@ export default class ForgotScreen  extends Component {
       let url =''
       console.log(this.state)
       if(this.props.typePage ==1){
-        url ='http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug+'/donatur?page='+this.state.index
+        url ='https://sharinghappiness.org/api/v1/program/'+this.props.slug+'/donatur?page='+this.state.index
       }else{
-        url ='http://devel.sharinghappiness.org/api/v1/program/'+this.props.slug+'/fundraiser?page='+this.state.index
+        url ='https://sharinghappiness.org/api/v1/program/'+this.props.slug+'/fundraiser?page='+this.state.index
 
       }
 
@@ -181,10 +181,10 @@ export default class ForgotScreen  extends Component {
         console.log(this.state)
         const url= ''
         if(this.props.title == 'Latest'){
-          url='http://devel.sharinghappiness.org/api/v1/program'
+          url='https://sharinghappiness.org/api/v1/program'
         }
         
-        fetch('http://devel.sharinghappiness.org/api/v1/program?order='+order, {
+        fetch('https://sharinghappiness.org/api/v1/program?order='+order, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -211,7 +211,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',

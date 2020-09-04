@@ -45,7 +45,7 @@ export default class ForgotScreen  extends Component {
 
     submit= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/program/fundraise/'+this.props.id, {
+        fetch('https://sharinghappiness.org/api/v1/program/fundraise/'+this.props.id, {
         method: 'POST',
         headers: {
             Accept: 'application/json',

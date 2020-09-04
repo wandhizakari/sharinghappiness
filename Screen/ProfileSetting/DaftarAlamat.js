@@ -38,7 +38,7 @@ export default class DaftarAlamatScreen extends Component<Props> {
   getDataAddress = async () => {
     this.setState({ loading: true })
     let { token, email } = this.state
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/address?token=${token}&token_email=${email}`, {
+    fetch(`https://sharinghappiness.org/api/v1/user/address?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -48,8 +48,8 @@ export default class DaftarAlamatScreen extends Component<Props> {
     .then((respJson) => {
       this.setState({ loading: false })
       console.log('getDataAddress', respJson)
-      if (respJson.status == 20) {
-        let data = respJson.result.data
+      if(respJson.status == 20 ) {
+        let data = respJson.result?respJson.result.data:[]
         this.setState({ addressList: data })
       } else {
         Snackbar.show({
@@ -67,8 +67,8 @@ export default class DaftarAlamatScreen extends Component<Props> {
   deleteDataAddress = async (id) => {
     this.setState({ loading: true })
     let { token, email } = this.state
-    console.log(`http://devel.sharinghappiness.org/api/v1/user/address/delete/${id}?token=${token}&token_email=${email}`)
-    fetch(`http://devel.sharinghappiness.org/api/v1/user/address/delete/${id}?token=${token}&token_email=${email}`, {
+    console.log(`https://sharinghappiness.org/api/v1/user/address/delete/${id}?token=${token}&token_email=${email}`)
+    fetch(`https://sharinghappiness.org/api/v1/user/address/delete/${id}?token=${token}&token_email=${email}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',

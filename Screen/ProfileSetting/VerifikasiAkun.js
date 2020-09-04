@@ -36,9 +36,9 @@ export default class VerifikasiAkunScreen extends Component<Props> {
     return (
       <View style={{ flex: 1 }}>
         <ScrollView style={ styles.container }>
-          <View style={ dataSession.is_profile_complete ? styles.infoSuccessWrapper : styles.infoWrapper }>
-            <Text style={ dataSession.is_profile_complete ? styles.infoSuccessText : styles.infoText }>
-              { dataSession.is_profile_complete ? 'Selamat data anda sudah terverifikasi' : 'Akun anda belum diverifikasi' }
+          <View style={ styles.infoSuccessWrapper  }>
+            <Text style={ styles.infoSuccessText }>
+              {  'Silahkan kunjungi website https://sharinghappiness.org ' }
             </Text>
           </View>
 

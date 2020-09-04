@@ -69,7 +69,7 @@ export default class ForgotScreen  extends Component {
 
     login= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/user/forgot-password', {
+        fetch('https://sharinghappiness.org/api/v1/user/forgot-password', {
         method: 'POST',
         headers: {
             Accept: 'application/json',

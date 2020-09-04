@@ -93,7 +93,7 @@ export default class ForgotScreen  extends Component {
 
     getProgram= async ()=>{
         console.log(this.state)
-        fetch('http://devel.sharinghappiness.org/api/v1/program?order=newest', {
+        fetch('https://sharinghappiness.org/api/v1/program?order=newest', {
         method: 'GET',
         headers: {
             Accept: 'application/json',
@@ -129,7 +129,7 @@ export default class ForgotScreen  extends Component {
     }
     getProgram1= async ()=>{
       console.log(this.state)
-      fetch('http://devel.sharinghappiness.org/api/v1/program?order=popular', {
+      fetch('https://sharinghappiness.org/api/v1/program?order=popular', {
       method: 'GET',
       headers: {
           Accept: 'application/json',
